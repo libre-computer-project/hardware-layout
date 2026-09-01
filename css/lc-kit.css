@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:cb2f733eaff5d727d79096939667026a1daf22ca670c0bacd867cde539fc21b3 */
+/* lc-kit 1 sha256:6b1b84ede7616ddd8dd143d16fce1b3dbec8fbd6b3a81b54099aad6f60308290 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout and the board
    layout viewer.
  *
@@ -163,6 +163,21 @@ a:hover { text-decoration: underline; }
   --c-usb: #1f6fb5;
   --c-eth: #0d8f6a;
   --c-misc: #5a6570;
+}
+
+/* THE SERIAL CONSOLE HEADER IS COLOURED AS THE CABLE, not as a signal class.
+   Ground black, TX white, RX green -- the USB-TTL lead everyone plugs into it,
+   and the colours our own documentation has always named for that header:
+   "2J1 Connector Highlighted in Red: Ground (BLACK) TX (WHITE) RX (GREEN)".
+   Someone at the board with the cable in their hand is matching wire to pin,
+   so the pin should be the colour of the wire.
+
+   These are wire colours, so they do NOT flip with the theme -- a black lead
+   is black on both. They sit on the drawn board rather than on the page. */
+:root, html.dark {
+  --c-wire-gnd: #14161a;
+  --c-wire-tx:  #f3f5f7;
+  --c-wire-rx:  #2ea043;
 }
 
 html.dark {

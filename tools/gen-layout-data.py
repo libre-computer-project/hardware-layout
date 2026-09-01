@@ -219,6 +219,59 @@ def _pinout_primary_class(pinout_dir):
         sys.path.remove(str(tools))
 
 
+UART_FUNC = re.compile(r"UART.*?_(TX|RX)|^(TX|RX)D?$", re.IGNORECASE)
+
+
+def _uart_wire(pin):
+    """Which console-cable wire this pin is, or None.
+
+    The serial header is colour-coded as the CABLE -- ground black, TX white,
+    RX green -- so a pin has to be identified by FUNCTION, never by position.
+    The order is not a convention that holds: the Amlogic CC boards run
+    GND/TX/RX down 2J1 and ROC-RK3399-PC runs RX/TX/GND down J13, so counting
+    pads off would put ground at the wrong end of that board's header.
+    """
+    if (pin.get("cls") == "gnd") or (pin.get("type") == "GND"):
+        return "wire-gnd"
+    for f in list(pin.get("funcs") or []) + [pin.get("ref") or ""]:
+        m = UART_FUNC.search(str(f))
+        if m:
+            return "wire-tx" if (m.group(1) or m.group(2)).upper() == "TX" else "wire-rx"
+    return None
+
+
+def read_uart_header(data):
+    """The dedicated serial-console header, as {id: {pin: wire-class}}.
+
+    A header qualifies only if it is exactly ground, TX and RX -- which is what
+    the console cable plugs onto. Identified by what its pins DO, because a
+    three-pin header is not otherwise a serial port: AML-S905X-CC's 9J1 is
+    GND/SPDIF/5V and ROC-RK3328-CC's J21 and J22 are ADC and PHY pins, and all
+    three would be caught by a size test.
+
+    Not the UART pins on the 40-pin header. Those are muxable pads that the
+    pinout draws green like any other GPIO, and this is about the header a
+    cable goes onto.
+    """
+    for h in data.get("headers", []):
+        pins = h.get("pins") or []
+        if len(pins) != 3 or not h.get("id"):
+            continue
+        wires = {str(p["pin"]): _uart_wire(p) for p in pins
+                 if p.get("pin") is not None}
+        if set(wires.values()) == {"wire-gnd", "wire-tx", "wire-rx"}:
+            return {h["id"]: wires}
+    return {}
+
+
+def read_uart_classes(pinout_dir, board_id):
+    """read_uart_header for one board, or {} when it has no published pinout."""
+    path = Path(pinout_dir) / f"{board_id}.json"
+    if not path.exists():
+        return {}
+    return read_uart_header(json.loads(path.read_bytes()))
+
+
 def read_pin_classes(pinout_dir, board_id, primary_class=None):
     """Signal class per pin of the 40-pin GPIO header, from the pinout site.
 
@@ -269,7 +322,7 @@ def read_pin_classes(pinout_dir, board_id, primary_class=None):
     return out
 
 
-def pack_component(c, problems, where, pinclasses=None):
+def pack_component(c, problems, where, pinclasses=None, uartclasses=None):
     """One placed part, with the defaults left out.
 
     Every key the renderer reads survives. What goes is `origin` when it is the
@@ -318,6 +371,21 @@ def pack_component(c, problems, where, pinclasses=None):
     pp = c.get("pin_pads")
     if pp:
         groups = pp.get("groups") if isinstance(pp, dict) and "groups" in pp else [pp]
+
+        # WHICH DOCUMENTED HEADER IS THIS PART, decided once for the whole
+        # component rather than per group. A footprint's pads are grouped by
+        # SHAPE, and a header's pin 1 is usually a square pad among round ones
+        # -- so AML-A311D-CC's 2J1 arrives as a group of two and a group of
+        # one, and a rule that measured a group against the pin count matched
+        # neither and silently coloured nothing.
+        pads = sum(len(g.get("pins") or []) for g in groups)
+        wires = (uartclasses or {}).get(c["refdes"])
+        colours = None
+        if pinclasses and pads == GPIO_HEADER_PINS:
+            colours = pinclasses
+        elif wires and pads == len(wires):
+            colours = wires
+
         packed_groups = []
         for g in groups:
             pos = g.get("positions") or []
@@ -327,14 +395,12 @@ def pack_component(c, problems, where, pinclasses=None):
                 "pw": q(g.get("pad_w", 0)), "ph": q(g.get("pad_h", 0)),
                 "sh": g.get("shape", "rect"), "pos": qlist(pos),
             }
-            # Signal class per pad of the 40-pin GPIO header. Keyed by the CAD's
-            # own pin designators rather than by counting pads off in order:
-            # the order is right on every board here, but that is a property of
-            # the export, and a mirrored or bottom-side header would number
-            # backwards without saying so.
-            names = g.get("pins") or []
-            if pinclasses and len(names) == GPIO_HEADER_PINS:
-                cls = [pinclasses.get(str(n), "") for n in names]
+            # Keyed by the CAD's own pin designators rather than by counting
+            # pads off in order: the order is right on every board here, but
+            # that is a property of the export, and a mirrored or bottom-side
+            # header would number backwards without saying so.
+            if colours:
+                cls = [colours.get(str(n), "") for n in (g.get("pins") or [])]
                 if any(cls):
                     pg["cls"] = cls
             packed_groups.append(pg)
@@ -392,6 +458,7 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
     problems = []
     pinclasses = (read_pin_classes(pinout_dir, meta["id"], primary_class)
                   if pinout_dir else {})
+    uartclasses = read_uart_classes(pinout_dir, meta["id"]) if pinout_dir else {}
 
     layers = raw.get("layers") or {"top": {"components": raw.get("components", []),
                                            "categories": raw.get("categories", {})}}
@@ -414,7 +481,8 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
             continue
         base["categories"][side] = lay.get("categories", {})
         base["components"][side] = [
-            pack_component(c, problems, f"{meta['id']}.{side}", pinclasses)
+            pack_component(c, problems, f"{meta['id']}.{side}", pinclasses,
+                           uartclasses)
             for c in lay.get("components", [])
         ]
 
