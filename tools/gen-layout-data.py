@@ -474,6 +474,9 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
         "components": {},
         "nets": raw.get("nets", {}),
         "pin_nets": qlist(raw.get("pin_nets", [])),
+        # Board-level, because a hole goes THROUGH the board: the viewer draws
+        # these on both sides, where a component is only ever on one.
+        "holes": qlist(raw.get("holes", [])),
     }
     for side in ("top", "bot"):
         lay = layers.get(side)

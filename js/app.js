@@ -491,6 +491,39 @@ const by = (py) => -(py - vy) / vs;
 
 /* ---- drawing ------------------------------------------------------------- */
 
+/* Every hole drilled through the board, drawn on BOTH sides.
+ *
+ * A component belongs to the side it is placed on, so the bottom view drew
+ * only bottom-side parts -- and every through-hole feature mounted on top
+ * vanished from it. On AML-A311D-CC that was all four mounting holes and
+ * eleven connectors, the 40-pin header among them: the back of the board came
+ * out blank where it is plainly drilled through.
+ *
+ * These sit under the parts, so on the top side the header's pads and the
+ * mounting rings still cover their own bores and nothing changes; on the
+ * bottom they are what is there. Vias are not in the data -- they are the
+ * overwhelming majority of hits and not what a reader is looking for.
+ */
+function drawHoles(cuOn) {
+  const h = board.holes;
+  if (!h || !h.length) return;
+  /* Same two colours the mounting hole's own bore uses: the board's colour
+     inside, because that is what a hole shows, and the ring stroke to mark it
+     -- which is also what keeps a hole visible once copper is on and the
+     substrate has gone near-black. */
+  ctx.fillStyle = cssVar(cuOn ? "--board-cu" : "--board");
+  ctx.strokeStyle = cssVar("--hole-ring");
+  ctx.lineWidth = 1;
+  for (let i = 0; i < h.length; i += 3) {
+    const r = (h[i + 2] * vs) / 2;
+    if (r < 0.6) continue;            /* below a pixel it is a smudge */
+    ctx.beginPath();
+    ctx.arc(sx(h[i]), sy(h[i + 1]), r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
 function draw() {
   if (!board) return;
   const [cw, ch] = stageSize();
@@ -509,6 +542,7 @@ function draw() {
   const cuOn = visibleCopper.size > 0 && copper;
   drawOutline(cuOn);
   if (cuOn) drawCopper();
+  drawHoles(cuOn);
 
   /* Small parts first so a 0402 never disappears under the SoC, and the
      selected part last so it is never covered by anything. */
