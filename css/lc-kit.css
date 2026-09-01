@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:6b1b84ede7616ddd8dd143d16fce1b3dbec8fbd6b3a81b54099aad6f60308290 */
+/* lc-kit 1 sha256:33177aaeaf6c935ce622b6512b18b6ee3d2d2ded6b3d0bc24a39263911c046db */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout and the board
    layout viewer.
  *
@@ -130,14 +130,19 @@ a:hover { text-decoration: underline; }
    first time a colour changed. Both sites now take the one definition, and
    check-kit.py fails the build if a vendored copy drifts.
 
-   Rails ramp by voltage: the higher the supply, the deeper the red. I2C
-   yellow / SPI blue / GPIO green match the board silkscreen. */
+   RAILS RAMP BY VOLTAGE, red through orange to yellow as the supply falls:
+   12V and PoE deepest, 5V red, 3.3V orange, 1.8V yellow. The ramp used to run
+   red into brown, which made 3.3V a burnt orange and 1.8V a tan -- neither
+   nameable as a colour, and the three rails a reader actually reaches for on
+   a header are the three that have to be told apart at a glance.
+
+   I2C yellow / SPI blue / GPIO green match the board silkscreen. */
 :root {
   --c-poe: #6e0011;
   --c-power12v: #b8000f;
-  --c-power5v: #cf2b30;
-  --c-power3v3: #c2530b;
-  --c-powerlv: #9a6b32;   /* 1.8V / 3.0V */
+  --c-power5v: #d32f2f;
+  --c-power3v3: #e8730c;
+  --c-powerlv: #e0a800;   /* 1.8V / 3.0V */
   --c-gnd: #454b54;
   --c-nc: #6b6547;        /* not connected */
   --c-gpio: #2f7d3f;
@@ -185,7 +190,7 @@ html.dark {
   --c-power12v: #cc0f1b;
   --c-power5v: #e5484d;
   --c-power3v3: #f76b15;
-  --c-powerlv: #e8b17a;
+  --c-powerlv: #f5c518;   /* 1.8V / 3.0V */
   --c-gnd: #454b54;
   --c-nc: #3c3a2e;
   --c-gpio: #46a758;
