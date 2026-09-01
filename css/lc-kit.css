@@ -1,0 +1,418 @@
+/* lc-kit 1 sha256:cb2f733eaff5d727d79096939667026a1daf22ca670c0bacd867cde539fc21b3 */
+/* Libre Computer hardware-tool shell — shared by the GPIO pinout and the board
+   layout viewer.
+ *
+ * These two sites had grown the same header, the same board picker, the same
+ * search box and the same footer twice, with the same seven token names holding
+ * the same seven values in both. This is that shell, defined once.
+ *
+ * THEME. Three states, matching libre.computer: light, dark, and auto, which
+ * follows the OS and is the default -- a visitor whose desktop is dark should
+ * not have to ask twice. The switch is a `dark` class on <html>, set before
+ * first paint by the inline script in each page's <head>, so a dark visitor
+ * never sees a white flash. Light is the base and dark is the override, because
+ * a stylesheet that loses its media query should degrade to the more legible
+ * of the two.
+ *
+ * The dark values are exactly what both sites shipped before this file existed,
+ * so adopting the kit changes nothing for a dark visitor and adds a light theme
+ * that did not exist.
+ *
+ * WHAT BELONGS HERE. The shell and nothing else: page frame, top bar, brand,
+ * the controls slot, notices, footer, form controls, focus, and the theme
+ * button. A site's own subject matter -- the pinout's mux-class colours, the
+ * layout viewer's copper-layer colours -- stays in that site's stylesheet,
+ * because nothing is shared by having one file know about both.
+ *
+ * This file is VENDORED. Edit tools/lc-ui-kit/lc-kit.css in the monorepo and
+ * run tools/lc-ui-kit/sync.py; a hand-edit here fails each site's CI.
+ */
+
+:root {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --bg-raised: #f8fafc;
+  --bg-sunken: #eef2f6;
+  --border: #d8e0e8;
+  --text: #0f172a;
+  --text-dim: #5a6673;
+  /* Blue TEXT on the page ground, so it darkens on white (#0077b0 is 4.92:1)
+     and lightens on the dark ground below. Same two shades libre.computer
+     uses, and for the same contrast reason. */
+  --accent: #0077b0;
+  --brass: #8a6a10;
+  --warn: #b45309;
+  --danger: #b42318;
+
+  --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .04);
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --bg: #14161a;
+  --bg-raised: #1d2026;
+  --bg-sunken: #0e1013;
+  --border: #33383f;
+  --text: #e8eaed;
+  --text-dim: #9aa0a6;
+  --accent: #4da3ff;
+  --brass: #c9a227;
+  --warn: #f76b15;
+  --danger: #f5a3a6;
+
+  --shadow: none;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+:where(button, select, input, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ---- top bar ---------------------------------------------------------- */
+
+.lc-topbar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+.lc-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+}
+
+.lc-brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.lc-brand-name:hover { text-decoration: none; color: var(--accent); }
+
+.lc-brand-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* SIGNAL CLASS PALETTE -- shared, because the two tools colour the SAME pins.
+   The pinout draws a board's header and the layout draws that header's pads on
+   the PCB, and a visitor moving between them reads the colour as meaning the
+   same thing. It did not live here at first, when only one tool used it; a
+   second copy in the layout's own stylesheet would be a second answer the
+   first time a colour changed. Both sites now take the one definition, and
+   check-kit.py fails the build if a vendored copy drifts.
+
+   Rails ramp by voltage: the higher the supply, the deeper the red. I2C
+   yellow / SPI blue / GPIO green match the board silkscreen. */
+:root {
+  --c-poe: #6e0011;
+  --c-power12v: #b8000f;
+  --c-power5v: #cf2b30;
+  --c-power3v3: #c2530b;
+  --c-powerlv: #9a6b32;   /* 1.8V / 3.0V */
+  --c-gnd: #454b54;
+  --c-nc: #6b6547;        /* not connected */
+  --c-gpio: #2f7d3f;
+  --c-i2c: #9a7b0a;
+  --c-spi: #1f5fd0;
+  --c-uart: #7c30cc;
+  --c-pwm: #c4295a;
+  --c-i2s: #0b6f80;
+  --c-pcm: #0b5566;
+  --c-tdm: #13876b;
+  --c-spdif: #7a2490;
+  --c-pdm: #4a7a0a;
+  --c-dac: #076a4c;
+  --c-adc: #5b8a12;
+  --c-clk: #6b737b;
+  --c-jtag: #c25a06;
+  --c-cec: #5334c4;
+  --c-ir: #c33a6a;
+  --c-sdio: #0d7f95;
+  --c-nand: #6d5449;
+  --c-video: #a81c4c;
+  --c-pcie: #6a4fc4;
+  --c-usb: #1f6fb5;
+  --c-eth: #0d8f6a;
+  --c-misc: #5a6570;
+}
+
+html.dark {
+  --c-poe: #6e0011;
+  --c-power12v: #cc0f1b;
+  --c-power5v: #e5484d;
+  --c-power3v3: #f76b15;
+  --c-powerlv: #e8b17a;
+  --c-gnd: #454b54;
+  --c-nc: #3c3a2e;
+  --c-gpio: #46a758;
+  --c-i2c: #eac54f;
+  --c-spi: #3b82f6;
+  --c-uart: #a855f7;
+  --c-pwm: #ec5f87;
+  --c-i2s: #1098ad;
+  --c-pcm: #0b7285;
+  --c-tdm: #63e6be;
+  --c-spdif: #862e9e;
+  --c-pdm: #5c940d;
+  --c-dac: #087f5b;
+  --c-adc: #94d82d;
+  --c-clk: #adb5bd;
+  --c-jtag: #ff922b;
+  --c-cec: #7048e8;
+  --c-ir: #f06595;
+  --c-sdio: #66d9e8;
+  --c-nand: #8d6e63;
+  --c-video: #c2255c;
+  --c-pcie: #b197fc;
+  --c-usb: #74c0fc;
+  --c-eth: #12b886;
+  --c-misc: #6c757d;
+}
+
+/* The switch between the two hardware tools. It sits where the subtitle used
+   to, because it says the same thing -- which tool this is -- and additionally
+   says what the other one is, which a visitor otherwise has no way to find out
+   from here. The current tool stays plain text: a link to the page you are on
+   is a dead control that costs a click to discover. */
+.lc-sites {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.lc-site {
+  white-space: nowrap;
+  color: var(--text-dim);
+}
+.lc-site[aria-current="page"] {
+  color: var(--text);
+  font-weight: 600;
+}
+a.lc-site:hover { color: var(--accent); text-decoration: none; }
+a.lc-site:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Separator drawn rather than typed, so it is not read out as a word and not
+   selected when the visitor copies the heading. */
+.lc-site + .lc-site::before {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 11px;
+  margin-right: 10px;
+  vertical-align: -1px;
+  background: var(--border);
+}
+
+/* A pill for a state the visitor should not have to infer, e.g. that the board
+   picker is currently listing boards nobody can buy yet. */
+.lc-flag {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--warn);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+
+/* A <select> sizes itself to its widest option and will not shrink below it,
+   so without the min-width:0 / max-width pair a long board name pushes the
+   whole bar sideways on a phone -- measured at 495px of control on a 375px
+   viewport, which moved the entire page 125px. A flex item's automatic minimum
+   is its content, so flex-shrink alone never reaches it. */
+.lc-controls {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+.lc-controls label { color: var(--text-dim); font-size: 13px; }
+.lc-controls select { min-width: 0; max-width: 100%; }
+
+select,
+input[type="search"],
+input[type="text"] {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 13px;
+}
+select:hover,
+input[type="search"]:hover,
+input[type="text"]:hover { border-color: var(--text-dim); }
+input[type="search"] { width: 190px; }
+input[type="search"]::placeholder { color: var(--text-dim); }
+
+/* ---- theme button ------------------------------------------------------ */
+
+.lc-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .35rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: .85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lc-theme-btn:hover { border-color: var(--text-dim); }
+.lc-theme-icon { font-size: 1rem; line-height: 1; }
+
+/* Auto is the default, so it reads as the quiet state; an explicit choice is
+   marked, which is the whole point of showing the state rather than a bare
+   "Theme". */
+.lc-theme-btn[data-theme="auto"] { color: var(--text-dim); }
+.lc-theme-btn[data-theme="light"],
+.lc-theme-btn[data-theme="dark"] { border-color: currentColor; }
+
+@media (max-width: 560px) {
+  /* The label goes before the control does: the icon plus the title attribute
+     still say which state is active. */
+  .lc-theme-label { display: none; }
+}
+
+/* ---- notices ----------------------------------------------------------- */
+
+.lc-notices { flex: none; }
+
+.lc-notice {
+  margin: 0;
+  padding: 7px 16px;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--warn) 14%, var(--bg));
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.lc-notice.error {
+  background: color-mix(in srgb, var(--danger) 14%, var(--bg));
+}
+.lc-notice code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.lc-notice a { text-decoration: underline; }
+
+/* ---- footer ------------------------------------------------------------ */
+
+.lc-footer {
+  flex: none;
+  padding: 7px 16px;
+  background: var(--bg-raised);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---- shared bits both tools grew separately ---------------------------- */
+
+.lc-main { flex: 1; display: flex; min-height: 0; }
+
+.lc-panel {
+  flex: none;
+  background: var(--bg-raised);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.lc-panel h3 {
+  margin: 16px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .9px;
+  color: var(--text-dim);
+}
+.lc-panel h3:first-child { margin-top: 0; }
+
+.lc-seg { display: flex; gap: 5px; }
+.lc-seg button {
+  flex: 1;
+  padding: 6px 8px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lc-seg button:hover { border-color: var(--text-dim); color: var(--text); }
+.lc-seg button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lc-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 2px;
+  padding: 4px 7px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.lc-toggle:hover { background: var(--bg-sunken); }
+.lc-toggle[aria-pressed="false"] { opacity: .42; }
+.lc-toggle .lc-swatch { flex: none; width: 11px; height: 11px; border-radius: 2px; }
+.lc-toggle .lc-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lc-toggle .lc-count { flex: none; color: var(--text-dim); font-size: 11px; }
+
+[hidden] { display: none !important; }

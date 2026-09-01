@@ -1,0 +1,56 @@
+name: Publish
+
+# The site is static, so the deploy is a copy. What earns a workflow is the
+# gate in front of it: this repository is public, and its data is derived from
+# CAD exports that carry more than a board's geometry, so the check that the
+# published tree holds only what it should runs on every push and a failure
+# stops the deploy rather than annotating it.
+#
+# Regenerating the data is NOT done here. It reads the ODB++ archives, which
+# live in the private hardware repository and are not available to this runner
+# -- so `tools/gen-layout-data.py` is run by a person, against that tree, and
+# its output is committed. CI's job is to refuse a bad commit, not to make one.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate the published tree
+        run: python3 tools/check-site.py
+      - name: Verify the vendored shell kit
+        run: python3 tools/check-kit.py
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

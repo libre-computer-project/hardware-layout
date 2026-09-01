@@ -1,0 +1,197 @@
+{
+ "generated": "2026-09-01",
+ "boards": [
+  {
+   "id": "aml-s905x-cc-v2",
+   "model": "AML-S905X-CC-V2",
+   "name": "Sweet Potato",
+   "rev": "V2.0-C",
+   "soc": "S905X",
+   "vendor": "Amlogic",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    85,
+    56
+   ],
+   "layers": 6,
+   "parts": {
+    "top": 169,
+    "bot": 228
+   }
+  },
+  {
+   "id": "aml-s905x-cc-v3",
+   "model": "AML-S905X-CC-V3",
+   "name": "Das Potato",
+   "rev": "V3-ICC",
+   "soc": "S905X",
+   "vendor": "Amlogic",
+   "status": "unreleased",
+   "hidden": true,
+   "size_mm": [
+    85,
+    56
+   ],
+   "layers": 6,
+   "parts": {
+    "top": 171,
+    "bot": 266
+   }
+  },
+  {
+   "id": "aml-s805x-ac",
+   "model": "AML-S805X-AC",
+   "name": "La Frite",
+   "rev": "V1.0",
+   "soc": "S805X",
+   "vendor": "Amlogic",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    56,
+    65
+   ],
+   "layers": 0,
+   "parts": {
+    "top": 150,
+    "bot": 190
+   }
+  },
+  {
+   "id": "aml-s805x-ac-v2",
+   "model": "AML-S805X-AC-V2",
+   "name": "Das Frite",
+   "rev": "V2.0C",
+   "soc": "S805X",
+   "vendor": "Amlogic",
+   "status": "unreleased",
+   "hidden": true,
+   "size_mm": [
+    56,
+    65
+   ],
+   "layers": 6,
+   "parts": {
+    "top": 147,
+    "bot": 195
+   }
+  },
+  {
+   "id": "aml-a311d-cc",
+   "model": "AML-A311D-CC",
+   "name": "Alta",
+   "rev": "V1.0C",
+   "soc": "A311D",
+   "vendor": "Amlogic",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    85,
+    56
+   ],
+   "layers": 8,
+   "parts": {
+    "top": 281,
+    "bot": 398
+   },
+   "shares_layout_with": "aml-s905d3-cc"
+  },
+  {
+   "id": "aml-a311d-cm",
+   "model": "AML-A311D-CM",
+   "name": "Alta CM",
+   "rev": "V0.2",
+   "soc": "A311D",
+   "vendor": "Amlogic",
+   "status": "preprod",
+   "hidden": true,
+   "size_mm": [
+    55,
+    40
+   ],
+   "layers": 10,
+   "parts": {
+    "top": 153,
+    "bot": 310
+   }
+  },
+  {
+   "id": "aml-s905d3-cc",
+   "model": "AML-S905D3-CC",
+   "name": "Solitude",
+   "rev": "V1.0C",
+   "soc": "S905D3",
+   "vendor": "Amlogic",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    85,
+    56
+   ],
+   "layers": 8,
+   "parts": {
+    "top": 281,
+    "bot": 398
+   },
+   "shares_layout_with": "aml-a311d-cc"
+  },
+  {
+   "id": "med-mt83-ace",
+   "model": "MED-MT83-ACE",
+   "name": "Livia",
+   "rev": "V0.1",
+   "soc": "MT8385",
+   "vendor": "MediaTek",
+   "status": "preprod",
+   "hidden": true,
+   "size_mm": [
+    65,
+    56
+   ],
+   "layers": 8,
+   "parts": {
+    "top": 356,
+    "bot": 303
+   }
+  },
+  {
+   "id": "med-mt88-mx",
+   "model": "MED-MT88-MX",
+   "name": "Virginia",
+   "rev": "V0.1",
+   "soc": "MT8370/MT8390",
+   "vendor": "MediaTek",
+   "status": "preprod",
+   "hidden": true,
+   "size_mm": [
+    80,
+    69.6
+   ],
+   "layers": 8,
+   "parts": {
+    "top": 468,
+    "bot": 510
+   }
+  },
+  {
+   "id": "mtk-g500-mmd",
+   "model": "G500 MMD",
+   "name": "MT8385 MMD reference",
+   "rev": "V1",
+   "soc": "MT8385",
+   "vendor": "MediaTek",
+   "status": "reference",
+   "hidden": true,
+   "size_mm": [
+    65,
+    56
+   ],
+   "layers": 8,
+   "parts": {
+    "top": 356,
+    "bot": 303
+   }
+  }
+ ]
+}

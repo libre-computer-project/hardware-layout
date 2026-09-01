@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libre Computer Board Layout</title>
+<meta name="description" content="Interactive PCB placement and routing viewer for Libre Computer single-board computers — every part, footprint, net and copper layer, read from the boards' own CAD data.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/lc-kit.css">
+<link rel="stylesheet" href="css/style.css">
+<!-- Sets the theme before first paint, so a dark visitor never sees a white
+     flash. Must stay inline and must stay ahead of the stylesheets; the copy
+     is checked by tools/lc-ui-kit/sync.py against HEAD_SNIPPET in lc-kit.js. -->
+<script>try{var p=localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
+</head>
+<body>
+
+<header class="lc-topbar">
+  <div class="lc-brand">
+    <a class="lc-brand-name" href="https://libre.computer">Libre Computer</a>
+    <nav class="lc-sites" aria-label="Hardware tools">
+      <a class="lc-site" data-lc-site
+         href="https://gpio.hardware.libre.computer/">GPIO Pinout</a>
+      <span class="lc-site" aria-current="page">Layout</span>
+    </nav>
+  </div>
+  <div class="lc-controls">
+    <label for="board-select">Board</label>
+    <select id="board-select" aria-label="Select board"></select>
+    <input id="search" type="search" placeholder="Search: U1, 7J1, LPDDR4…" autocomplete="off" spellcheck="false" aria-label="Search by reference designator or footprint">
+  </div>
+</header>
+
+<div class="lc-notices" id="notices"></div>
+
+<div class="lc-main">
+  <aside class="lc-panel" id="sidebar">
+    <h3>Board</h3>
+    <div id="board-meta"></div>
+
+    <h3>Side</h3>
+    <div class="lc-seg" id="side-seg" role="group" aria-label="Board side"></div>
+
+    <h3>Copper layers</h3>
+    <div id="copper-toggles"></div>
+    <p id="copper-note"></p>
+
+    <h3>Part classes</h3>
+    <div id="cat-toggles"></div>
+
+    <h3>Parts</h3>
+    <div id="comp-list" role="listbox" aria-label="Placed parts"></div>
+    <div id="detail"></div>
+  </aside>
+
+  <div id="stage">
+    <canvas id="canvas"></canvas>
+    <div id="tooltip" hidden></div>
+    <div id="hud"></div>
+    <div id="keys">
+      <kbd>F</kbd> fit · <kbd>T</kbd>/<kbd>B</kbd> side · <kbd>1</kbd>–<kbd>8</kbd> copper ·
+      right-click a pad for its net · <kbd>Esc</kbd> clear
+    </div>
+    <div id="spinner" hidden>Loading…</div>
+  </div>
+</div>
+
+<footer class="lc-footer">
+  Read from each board's own CAD data — ODB++ where there is an export,
+  the published mechanical model otherwise ·
+  <a href="https://gpio.hardware.libre.computer">GPIO pinout</a> ·
+  <a href="https://libre.computer">libre.computer</a>
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
