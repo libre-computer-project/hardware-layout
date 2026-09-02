@@ -581,9 +581,15 @@ function overlaps(g) {
  * the true failure -- AML-S805X-AC-V2's 1L1, a 2-pin SMD inductor whose box
  * overlaps four bores belonging to 4U1 on the other side -- from the 23.
  */
+const _ownsCache = new WeakMap();
 function ownsItsHoles(c) {
   const h = board.holes;
   if (!h || !h.length) return false;
+  /* Memoised per part. The answer cannot change while a board is loaded, and
+     the walk is every hole against every component on both sides -- on the
+     978-part board that is ~29k comparisons, which is cheap once and wasteful
+     on every frame the part stays selected. */
+  if (_ownsCache.has(c)) return _ownsCache.get(c);
   /* BOTH sides. A hole goes through the board, so the part that also claims it
      is often on the other face -- 1L1's four contested bores belong to 4U1 on
      the back, and checking only the visible side found no competitor and drew
@@ -591,15 +597,21 @@ function ownsItsHoles(c) {
   const all = (board.components.top || []).concat(board.components.bot || []);
   const others = all.filter((o) => o.r !== c.r);
   let mine = 0;
-  for (let i = 0; i < h.length; i += 3) {
+  let shared = false;
+  for (let i = 0; i < h.length && !shared; i += 3) {
     const hx = h[i], hy = h[i + 1];
     if (Math.abs(hx - c.x) > c.w / 2 || Math.abs(hy - c.y) > c.h / 2) continue;
     for (const o of others) {
-      if (Math.abs(hx - o.x) <= o.w / 2 && Math.abs(hy - o.y) <= o.h / 2) return false;
+      if (Math.abs(hx - o.x) <= o.w / 2 && Math.abs(hy - o.y) <= o.h / 2) {
+        shared = true;
+        break;
+      }
     }
-    mine++;
+    if (!shared) mine++;
   }
-  return mine > 0;
+  const v = !shared && mine > 0;
+  _ownsCache.set(c, v);
+  return v;
 }
 
 function drawHoles(cuOn, only) {
