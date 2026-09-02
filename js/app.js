@@ -209,6 +209,14 @@ async function loadBoard(id) {
   term = "";
   els.search.value = "";
 
+  /* And the panel that was SHOWING the old selection. `selected = null` above
+     resets the state but nothing repainted the panel, so the detail of a part
+     from the previous board survived the switch -- La Frite's 7J1 still on
+     screen while viewing AML-A311D-CC, which has no 7J1. Harmless-looking
+     until the panel was pinned to the top of the sidebar at full height,
+     where a stale part is the first thing read. */
+  showDetail();
+
   renderMeta();
   buildSideSeg();
   buildCopperToggles();
@@ -534,31 +542,64 @@ const by = (py) => -(py - vy) / vs;
 const _overlapCache = new WeakMap();
 function overlaps(g) {
   if (_overlapCache.has(g)) return _overlapCache.get(g);
-  let min = Infinity;
+  /* A ROUND pad is a circle, so its overlap is centre distance against
+     diameter -- testing its bounding box instead called AML-S805X-AC-V2's 5J1
+     and MED-MT88-MX's J3901 overlapping when their centres are 1.50 mm apart
+     with 1.25 mm pads. And the comparison needs an epsilon: four boards' 1J1
+     came out "overlapping" on 4.764 - 4.464 = 0.2999999999999998 against a
+     0.3 mm pad, which is a float artefact and not a touching pad. */
+  const EPS = 1e-6;
+  const round = g.sh === "r" || g.sh === "oval";
+  let hit = false;
   const n = g.pos.length / 2;
-  for (let i = 0; i < n && i < 400; i++) {
+  for (let i = 0; i < n && i < 400 && !hit; i++) {
     for (let j = i + 1; j < n && j < 400; j++) {
       const dx = Math.abs(g.pos[2 * i] - g.pos[2 * j]);
       const dy = Math.abs(g.pos[2 * i + 1] - g.pos[2 * j + 1]);
-      if (dx < g.pw && dy < g.ph) { min = 0; break; }
-      min = Math.min(min, Math.max(dx, dy));
+      if (round) {
+        if (Math.hypot(dx, dy) < Math.max(g.pw, g.ph) - EPS) { hit = true; break; }
+      } else if (dx < g.pw - EPS && dy < g.ph - EPS) { hit = true; break; }
     }
-    if (min === 0) break;
   }
-  const v = min === 0;
+  const v = hit;
   _overlapCache.set(g, v);
   return v;
 }
 
-/* How many drilled holes fall inside this part's box. */
-function holesInside(c) {
+/* Are the holes in this part's box exclusively ITS holes?
+ *
+ * The first attempt at ownership compared the hole count to the pin count,
+ * which is the wrong proxy in both directions and was too strict in practice:
+ * 23 pad-less parts across nine boards were blocked although every bore in
+ * their box was their own, AML-S805X-AC's 9J1 among them -- an HDMI socket
+ * with 23 pins and four shell-post bores, which went back to drawing the solid
+ * opaque block this was written to fix.
+ *
+ * What actually decides ownership is whether anything ELSE claims the hole. A
+ * bore inside two parts' boxes is ambiguous and left alone; a bore inside only
+ * this one is this one's, whatever the pin count says. That is what separates
+ * the true failure -- AML-S805X-AC-V2's 1L1, a 2-pin SMD inductor whose box
+ * overlaps four bores belonging to 4U1 on the other side -- from the 23.
+ */
+function ownsItsHoles(c) {
   const h = board.holes;
-  if (!h || !h.length) return 0;
-  let n = 0;
+  if (!h || !h.length) return false;
+  /* BOTH sides. A hole goes through the board, so the part that also claims it
+     is often on the other face -- 1L1's four contested bores belong to 4U1 on
+     the back, and checking only the visible side found no competitor and drew
+     them anyway. */
+  const all = (board.components.top || []).concat(board.components.bot || []);
+  const others = all.filter((o) => o.r !== c.r);
+  let mine = 0;
   for (let i = 0; i < h.length; i += 3) {
-    if (Math.abs(h[i] - c.x) <= c.w / 2 && Math.abs(h[i + 1] - c.y) <= c.h / 2) n++;
+    const hx = h[i], hy = h[i + 1];
+    if (Math.abs(hx - c.x) > c.w / 2 || Math.abs(hy - c.y) > c.h / 2) continue;
+    for (const o of others) {
+      if (Math.abs(hx - o.x) <= o.w / 2 && Math.abs(hy - o.y) <= o.h / 2) return false;
+    }
+    mine++;
   }
-  return n;
+  return mine > 0;
 }
 
 function drawHoles(cuOn, only) {
@@ -626,7 +667,7 @@ function draw() {
        the bores inside the box are exactly this part's pins, they are its
        pins. La Frite's 7J1 has 40 of each; 1L1 has 2 pins over 4 bores and is
        left alone. */
-    if (c && !c.pp && c.p && holesInside(c) === c.p) drawHoles(cuOn, c);
+    if (c && !c.pp && ownsItsHoles(c)) drawHoles(cuOn, c);
   }
 
 
@@ -927,6 +968,18 @@ function drawPart(c, cuOn) {
       ctx.fill();
       ctx.strokeStyle = isSel ? cssVar("--accent") : cssVar("--hole-ring");
       ctx.lineWidth = isSel ? 2.5 : 1.4;
+      ctx.stroke();
+    } else if (isSel) {
+      /* EVERY mounting hole answers a click, ring or no ring. Skipping the
+         zero-width annulus took the selection styling with it, because it
+         lived inside this block -- so on AML-S805X-AC, whose six mounting
+         holes size themselves from the drill and so have no ring to draw,
+         selecting one painted no accent at all and the click looked ignored.
+         The bore is what there is; it gets the accent. */
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.max(boreR, 2) + 2, 0, Math.PI * 2);
+      ctx.strokeStyle = cssVar("--accent");
+      ctx.lineWidth = 2.5;
       ctx.stroke();
     }
     if (c.d) {

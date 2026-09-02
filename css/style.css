@@ -112,7 +112,10 @@ body { overflow: hidden; }
 #detail:not(:empty) {
   order: -1;
   margin-top: 0;
-  margin-bottom: 14px;
+  /* PADDING, not margin. A margin is outside the border box and so is not
+     painted, and the pinned header's 14 px of it was a window the list rows
+     scrolled visibly through. */
+  margin-bottom: 0;
   position: sticky;
   top: 0;
   z-index: 2;
@@ -120,7 +123,7 @@ body { overflow: hidden; }
      is --bg-raised #f8fafc, so a sticky header painted --bg showed as a
      lighter band against its own panel while scrolling. */
   background: var(--bg-raised);
-  padding-bottom: 8px;
+  padding-bottom: 22px;
 }
 /* The column exists so #detail can be ordered to the top. It also makes every
    child a flex item, and a flex item SHRINKS below its declared height: the
