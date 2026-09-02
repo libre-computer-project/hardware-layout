@@ -205,6 +205,12 @@ def _pinout_primary_class(pinout_dir):
     tools = Path(pinout_dir).resolve().parent / "tools"
     src = tools / "gen-pinout-data.py"
     if not src.exists():
+        # SAY so. Returning None silently meant that with the pinout repo not
+        # beside this one the build still exited 0, printed nothing, and shipped
+        # boards with every header uncoloured -- a full-scale loss of a feature,
+        # indistinguishable in the output from a board that has no pinout.
+        print(f"note: no pin colours -- {src} not found, so no board's headers "
+              f"will carry signal classes", file=sys.stderr)
         return None
     sys.path.insert(0, str(tools))
     try:
@@ -262,23 +268,45 @@ def read_uart_header(data):
         wires = {str(p["pin"]): _uart_wire(p) for p in pins
                  if p.get("pin") is not None}
         # EVERY qualifying header, not the first. This returned from inside the
-        # loop, so a board could only ever have one console header -- and the
-        # MediaTek pair have two apiece (J3 on UART1, J4004 on UART0). Nothing
-        # was visibly wrong only because neither board has a published pinout;
-        # publish one and the second header would have stayed brass in silence.
+        # loop, so a board could only ever have one console header here.
+        #
+        # It changes nothing TODAY, and the honest reason is not the one first
+        # given: the MediaTek boards do have two console headers each, but they
+        # have no pinout file, so this function never runs on them and their
+        # two come from uart_headers_from_nets. Across all 15 pinout files no
+        # board has a second qualifying 3-pin header. This is a latent bug
+        # fixed on principle -- a loop that stops at the first match while its
+        # caller expects every match -- not a repair with a visible before.
         if set(wires.values()) == {"wire-gnd", "wire-tx", "wire-rx"}:
             out[h["id"]] = wires
     return out
 
 
 NET_GND = re.compile(r"(^|_)(D_)?GND(\d*)$|(^|_)GND(_|$)", re.IGNORECASE)
-NET_TX = re.compile(r"(^|_)U?[A-Z]*TXD?\d*(_|$)|(^|_)TX(_|$)", re.IGNORECASE)
-NET_RX = re.compile(r"(^|_)U?[A-Z]*RXD?\d*(_|$)|(^|_)RX(_|$)", re.IGNORECASE)
+# A UART line, and NOT merely a name with TX or RX in it. This started as
+# "contains TX", which in this very data also picks up the HDMI power rails
+# TX_OVDD / TX_OVDD33 / TX_AVCC12, the DDC I2C line TX_DDCSCL, the differential
+# pair HDMI0_TX0_P, the audio return ARC_RX and the PHY strap RXD1_TXDLY. None
+# is a console signal. Only the three-pad connector gate stopped those from
+# colouring something, which is one gate too few for a rule that decides what a
+# pin IS.
+NET_TX = re.compile(r"^(U|UART\d*_?)?TXD?\d*$|(^|_)UART\d*_?TXD?\d*(_|$)",
+                    re.IGNORECASE)
+NET_RX = re.compile(r"^(U|UART\d*_?)?RXD?\d*$|(^|_)UART\d*_?RXD?\d*(_|$)",
+                    re.IGNORECASE)
+# Whatever the name suggests, these are never a console signal.
+NET_NOT_UART = re.compile(
+    r"VDD|VCC|AVCC|OVDD|VBUS|_P$|_N$|SCL|SDA|DDC|LED|DLY|ARC|SHIELD|CLK",
+    re.IGNORECASE)
 
 
 def uart_headers_from_nets(raw):
-    """Console headers found in the board's OWN netlist, for boards with no
-    published pinout.
+    """Console headers found in the board's OWN netlist.
+
+    Runs on EVERY board, and its answers are merged per header UNDER the
+    pinout's -- see the setdefault at the call site. It is not gated to boards
+    without a pinout, and describing it that way would understate where a wrong
+    answer here could land.
 
     The colour rule reads the pinout site, which is right when there is one --
     that site is where a pin's function is decided. But four of the ten boards
@@ -330,6 +358,8 @@ def uart_headers_from_nets(raw):
                     break
                 if NET_GND.search(nm):
                     wires[pin] = "wire-gnd"
+                elif NET_NOT_UART.search(nm):
+                    break
                 elif NET_TX.search(nm):
                     wires[pin] = "wire-tx"
                 elif NET_RX.search(nm):
@@ -603,16 +633,38 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
     # matching strictly is colouring the wrong part.
     if pinclasses:
         placed = {c["r"]: sum(len(g.get("pos", [])) // 2 for g in (c.get("pp") or []))
-                  for side in ("top", "bot") for c in base["components"][side]}
+                  for side in ("top", "bot")
+                  for c in base["components"].get(side, [])}
+        coloured = {c["r"] for side in ("top", "bot")
+                    for c in base["components"].get(side, [])
+                    if any(g.get("cls") for g in (c.get("pp") or []))}
         for hid, m in pinclasses.items():
+            # The 40-pin header is in here too, under its own key because the
+            # two sites disagree about its refdes. Exempting it from this
+            # report meant the one board where it colours NOTHING said nothing
+            # -- AML-S805X-AC's 7J1 has no pad geometry at all, so the header a
+            # reader most wants is blank and the build was silent about it.
             if hid == GPIO_HEADER_KEY:
+                if not any(placed.get(r) == GPIO_HEADER_PINS for r in placed):
+                    print(f"note {meta['id']}: the {GPIO_HEADER_PINS}-pin header "
+                          f"is documented but no part here has "
+                          f"{GPIO_HEADER_PINS} pads to colour", file=sys.stderr)
                 continue
-            if placed.get(hid) != len(m):
-                got = placed.get(hid)
-                print(f"note {meta['id']}: pinout header {hid} ({len(m)} pins) "
-                      f"matched no part " +
-                      (f"({hid} has {got} pads here)" if got is not None
-                       else f"(no {hid} in this CAD)"), file=sys.stderr)
+            if hid in coloured:
+                continue
+            got = placed.get(hid)
+            # Say WHICH of the three it is. "matched no part" was wrong for two
+            # of the five it reported: the part exists, with that exact refdes,
+            # and simply carries no pad geometry -- which is a different
+            # problem with a different fix.
+            if got is None:
+                why = f"no {hid} in this CAD"
+            elif got == 0:
+                why = f"{hid} exists here but has no pad geometry"
+            else:
+                why = f"{hid} has {got} pads here"
+            print(f"note {meta['id']}: pinout header {hid} ({len(m)} pins) "
+                  f"not coloured ({why})", file=sys.stderr)
 
     copper = [pack_copper(c) for c in raw.get("copper", [])]
     base["copper_index"] = [

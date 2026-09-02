@@ -116,10 +116,18 @@ body { overflow: hidden; }
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--bg);
+  /* The panel it sits in, not the page: --bg is #ffffff and the sidebar panel
+     is --bg-raised #f8fafc, so a sticky header painted --bg showed as a
+     lighter band against its own panel while scrolling. */
+  background: var(--bg-raised);
   padding-bottom: 8px;
 }
+/* The column exists so #detail can be ordered to the top. It also makes every
+   child a flex item, and a flex item SHRINKS below its declared height: the
+   parts list, `height: 240px`, collapsed to 49.7 px on four boards and to 2 px
+   -- no rows at all -- whenever a part was selected. It keeps its height. */
 #sidebar { display: flex; flex-direction: column; }
+#sidebar > * { flex: none; }
 #detail h4 {
   margin: 0 0 6px;
   font: 700 14px ui-monospace, SFMono-Regular, Menlo, monospace;

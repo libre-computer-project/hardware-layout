@@ -313,7 +313,11 @@ function setSide(key) {
    on the board imported from a mechanical model, which has no copper and no
    netlist and says so two panels away. */
 function buildKeyHint() {
-  const n = (board.copper_index || []).length;
+  /* Capped at the keys that EXIST. onKey handles 1-8, so on AML-A311D-CM,
+     which has ten copper layers, a hint reading "1-10" promised two keys that
+     do nothing -- measured: 8 toggles L8, 9 and 0 change nothing. The layers
+     beyond the eighth are reachable from the sidebar toggles. */
+  const n = Math.min((board.copper_index || []).length, 8);
   const bits = ["<kbd>F</kbd> fit", "<kbd>T</kbd>/<kbd>B</kbd> side"];
   if (n === 1) bits.push("<kbd>1</kbd> copper");
   else if (n > 1) bits.push(`<kbd>1</kbd>–<kbd>${n}</kbd> copper`);
@@ -523,6 +527,40 @@ const by = (py) => -(py - vy) / vs;
  * bottom they are what is there. Vias are not in the data -- they are the
  * overwhelming majority of hits and not what a reader is looking for.
  */
+/* Does this pad group's pads actually touch each other? Computed from the
+   smallest neighbour spacing against the pad size, in board units, so it does
+   not change with zoom. Ten groups across the boards genuinely overlap -- the
+   SODIMM's 262 contacts are the worst, 0.35 mm pads on a 0.25 mm pitch. */
+const _overlapCache = new WeakMap();
+function overlaps(g) {
+  if (_overlapCache.has(g)) return _overlapCache.get(g);
+  let min = Infinity;
+  const n = g.pos.length / 2;
+  for (let i = 0; i < n && i < 400; i++) {
+    for (let j = i + 1; j < n && j < 400; j++) {
+      const dx = Math.abs(g.pos[2 * i] - g.pos[2 * j]);
+      const dy = Math.abs(g.pos[2 * i + 1] - g.pos[2 * j + 1]);
+      if (dx < g.pw && dy < g.ph) { min = 0; break; }
+      min = Math.min(min, Math.max(dx, dy));
+    }
+    if (min === 0) break;
+  }
+  const v = min === 0;
+  _overlapCache.set(g, v);
+  return v;
+}
+
+/* How many drilled holes fall inside this part's box. */
+function holesInside(c) {
+  const h = board.holes;
+  if (!h || !h.length) return 0;
+  let n = 0;
+  for (let i = 0; i < h.length; i += 3) {
+    if (Math.abs(h[i] - c.x) <= c.w / 2 && Math.abs(h[i + 1] - c.y) <= c.h / 2) n++;
+  }
+  return n;
+}
+
 function drawHoles(cuOn, only) {
   const h = board.holes;
   if (!h || !h.length) return;
@@ -581,7 +619,14 @@ function draw() {
      that part's holes on top of it. */
   if (selected) {
     const c = comps().find((x) => x.r === selected);
-    if (c && !c.pp) drawHoles(cuOn, c);
+    /* Only the part's OWN holes. A box test alone has no notion of ownership:
+       selecting AML-S805X-AC-V2's 1L1, a two-pin SMD inductor, drew four bores
+       through it that belong to 4U1 on the other side of the board. Holes are
+       board-level data with no part attached, so the proxy is the count -- if
+       the bores inside the box are exactly this part's pins, they are its
+       pins. La Frite's 7J1 has 40 of each; 1L1 has 2 pins over 4 bores and is
+       left alone. */
+    if (c && !c.pp && c.p && holesInside(c) === c.p) drawHoles(cuOn, c);
   }
 
 
@@ -866,13 +911,24 @@ function drawPart(c, cuOn) {
        0.3 mm. Where a board's export predates the drill-layer read, `d` is
        absent and only the ring is drawn; an outline with no bore is honest,
        a bore at an invented size is not. */
+    /* An annulus needs an OUTER radius bigger than the bore. Falling back to
+       the part's own box gives one only when the box is the pad; La Frite's
+       four M3 holes size themselves from the drill, so box == bore and the
+       ring came out zero-width -- a flat disc where the sibling board, whose
+       copper does report a 4.5 mm ring around the same 3 mm hole, draws a
+       proper annulus. With no ring in the data there is nothing to draw but
+       the bore, and drawing the bore alone is honest where inventing an outer
+       diameter is not. */
     const ringR = (c.ring ? c.ring : Math.max(c.w, c.h)) * vs / 2;
-    ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
-    ctx.fillStyle = isSel ? "rgba(77,163,255,.30)" : "rgba(201,162,39,.28)";
-    ctx.fill();
-    ctx.strokeStyle = isSel ? cssVar("--accent") : cssVar("--hole-ring");
-    ctx.lineWidth = isSel ? 2.5 : 1.4;
-    ctx.stroke();
+    const boreR = c.d ? c.d * vs / 2 : 0;
+    if (ringR > boreR + 0.5) {
+      ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+      ctx.fillStyle = isSel ? "rgba(77,163,255,.30)" : "rgba(201,162,39,.28)";
+      ctx.fill();
+      ctx.strokeStyle = isSel ? cssVar("--accent") : cssVar("--hole-ring");
+      ctx.lineWidth = isSel ? 2.5 : 1.4;
+      ctx.stroke();
+    }
     if (c.d) {
       ctx.beginPath(); ctx.arc(cx, cy, c.d * vs / 2, 0, Math.PI * 2);
       ctx.fillStyle = cssVar(cuOn ? "--board-cu" : "--board");
@@ -940,16 +996,27 @@ function drawPart(c, cuOn) {
          zoom. The pads are the CAD's, so the size stays; what is added is a
          hairline of the board between them, which is what solder mask does
          anyway. Only when the pads are actually big enough to read. */
-      if (Math.min(pw, ph) > 2.5 && g.pos.length > 4) {
+      /* A group whose pads genuinely OVERLAP needs the seam at any zoom it is
+         visible at, not only when the pads are comfortably large: gating on
+         pad size alone left the SODIMM fused again below about 160%, which
+         includes the zoom the board first fits at. A group that merely has
+         neighbours gets the seam only once it is big enough for the hairline
+         to be worth its cost. */
+      const tight = g.pos.length > 4 && overlaps(g);
+      if (g.pos.length > 4 && (tight ? Math.min(pw, ph) > 1 : Math.min(pw, ph) > 2.5)) {
         ctx.strokeStyle = cssVar(cuOn ? "--board-cu" : "--board");
-        ctx.lineWidth = 0.7;
+        ctx.lineWidth = tight ? 0.5 : 0.7;
         for (let i = 0; i < g.pos.length; i += 2) {
           const px = sx(g.pos[i]), py = sy(g.pos[i + 1]);
           if (g.sh === "r") {
             ctx.beginPath();
             ctx.arc(px, py, Math.max(pw, ph) / 2, 0, Math.PI * 2);
             ctx.stroke();
-          } else if (g.sh !== "oval") {
+          } else if (g.sh === "oval") {
+            ctx.beginPath();
+            ctx.ellipse(px, py, pw / 2, ph / 2, 0, 0, Math.PI * 2);
+            ctx.stroke();
+          } else {
             const w2 = g.sh === "s" ? Math.max(pw, ph) : pw;
             const h2 = g.sh === "s" ? Math.max(pw, ph) : ph;
             ctx.strokeRect(px - w2 / 2, py - h2 / 2, w2, h2);
