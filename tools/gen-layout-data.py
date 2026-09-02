@@ -209,8 +209,13 @@ def _pinout_primary_class(pinout_dir):
         # beside this one the build still exited 0, printed nothing, and shipped
         # boards with every header uncoloured -- a full-scale loss of a feature,
         # indistinguishable in the output from a board that has no pinout.
-        print(f"note: no pin colours -- {src} not found, so no board's headers "
-              f"will carry signal classes", file=sys.stderr)
+        # Not "no board's headers will carry signal classes" -- that was
+        # false. The console headers found in a board's OWN netlist do not go
+        # through here at all, so the MediaTek pair keep their cable colours;
+        # what is lost is the signal classes the pinout supplies.
+        print(f"note: {src} not found -- no board will carry the pinout's "
+              f"signal classes (console headers read from a board's own "
+              f"netlist are unaffected)", file=sys.stderr)
         return None
     sys.path.insert(0, str(tools))
     try:
@@ -273,10 +278,11 @@ def read_uart_header(data):
         # It changes nothing TODAY, and the honest reason is not the one first
         # given: the MediaTek boards do have two console headers each, but they
         # have no pinout file, so this function never runs on them and their
-        # two come from uart_headers_from_nets. Across all 15 pinout files no
-        # board has a second qualifying 3-pin header. This is a latent bug
-        # fixed on principle -- a loop that stops at the first match while its
-        # caller expects every match -- not a repair with a visible before.
+        # two come from uart_headers_from_nets. Across all 14 board files in
+        # that directory -- 15 entries, one of which is the boards.json
+        # manifest and carries no headers -- none has a second qualifying 3-pin
+        # header. This is a latent bug fixed on principle: a loop that stops at
+        # the first match while its caller expects every match.
         if set(wires.values()) == {"wire-gnd", "wire-tx", "wire-rx"}:
             out[h["id"]] = wires
     return out
@@ -290,10 +296,22 @@ NET_GND = re.compile(r"(^|_)(D_)?GND(\d*)$|(^|_)GND(_|$)", re.IGNORECASE)
 # is a console signal. Only the three-pad connector gate stopped those from
 # colouring something, which is one gate too few for a rule that decides what a
 # pin IS.
-NET_TX = re.compile(r"^(U|UART\d*_?)?TXD?\d*$|(^|_)UART\d*_?TXD?\d*(_|$)",
-                    re.IGNORECASE)
-NET_RX = re.compile(r"^(U|UART\d*_?)?RXD?\d*$|(^|_)UART\d*_?RXD?\d*(_|$)",
-                    re.IGNORECASE)
+#
+# Narrow, then not TOO narrow. The first cut of this took anything containing
+# TX; the second took so little that six real console spellings in this very
+# data stopped matching -- DEBUG_TX, UART_AO_B_TX, UART_A_TX, UART_C_TX,
+# LINUX_TX and RASPI_UTXD2. Amlogic writes UART_<port>_TX, and a pattern that
+# cannot read the vendor whose boards these mostly are is the wrong pattern.
+# None sits on a 3-pad connector today, so nothing was mis-drawn; it would have
+# failed the moment one did.
+NET_TX = re.compile(
+    r"^(U|UART\d*_?|DEBUG_|LINUX_|RASPI_U?)?TXD?\d*$"
+    r"|(^|_)UART(_?[A-Z]\d?)*_?TXD?\d*(_|$)",
+    re.IGNORECASE)
+NET_RX = re.compile(
+    r"^(U|UART\d*_?|DEBUG_|LINUX_|RASPI_U?)?RXD?\d*$"
+    r"|(^|_)UART(_?[A-Z]\d?)*_?RXD?\d*(_|$)",
+    re.IGNORECASE)
 # Whatever the name suggests, these are never a console signal.
 NET_NOT_UART = re.compile(
     r"VDD|VCC|AVCC|OVDD|VBUS|_P$|_N$|SCL|SDA|DDC|LED|DLY|ARC|SHIELD|CLK",
@@ -356,10 +374,15 @@ def uart_headers_from_nets(raw):
                 nm = net_name(x, y)
                 if not nm:
                     break
+                # The rejection list runs FIRST, ground included. Testing
+                # ground first let GND_RX_SHIELD -- a shield, not a ground pin
+                # -- classify as the ground wire, which is the one slot the
+                # three-signal gate cannot catch, because a wrong ground still
+                # leaves the set complete.
+                if NET_NOT_UART.search(nm):
+                    break
                 if NET_GND.search(nm):
                     wires[pin] = "wire-gnd"
-                elif NET_NOT_UART.search(nm):
-                    break
                 elif NET_TX.search(nm):
                     wires[pin] = "wire-tx"
                 elif NET_RX.search(nm):
@@ -512,7 +535,14 @@ def pack_component(c, problems, where, pinclasses=None, uartclasses=None):
             # The console header first: it is also a documented header, and the
             # cable colours are the more specific answer for it.
             colours = wires
-        elif pinclasses and pads == GPIO_HEADER_PINS:
+        elif (pads == GPIO_HEADER_PINS and (pinclasses or {}).get(GPIO_HEADER_KEY)
+              and c.get("category") == "connector"):
+            # Matched on pad COUNT, because the two sites disagree on this
+            # header's refdes -- which means a SECOND 40-pad part would be
+            # painted with the GPIO header's classes. Exactly one exists per
+            # board today (7J1 x3, 7J2 x2, CON1 x2), so there is no live
+            # defect, and `connector` is a cheap narrowing while the invariant
+            # holds. gen_stats records it so a second one is not silent.
             colours = pinclasses.get(GPIO_HEADER_KEY)
         elif by_id and pads == len(by_id):
             colours = by_id
@@ -631,10 +661,18 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
     # pad count means such a header silently colours nothing. Silent is the
     # problem: a mismatch is worth knowing about, and the alternative to
     # matching strictly is colouring the wrong part.
-    if pinclasses:
+    # `any(pinclasses.values())`, not `pinclasses`. When the pinout DATA is
+    # present but its generator is not, every per-header map comes back empty
+    # and pinclasses is {"__gpio40__": {}} -- truthy, so this block ran and
+    # found nothing to say while six boards shipped with their 40-pin header
+    # uncoloured and no note at all.
+    if any(pinclasses.values()):
         placed = {c["r"]: sum(len(g.get("pos", [])) // 2 for g in (c.get("pp") or []))
                   for side in ("top", "bot")
                   for c in base["components"].get(side, [])}
+        pins_by_ref = {c["r"]: c.get("p") or 0
+                       for side in ("top", "bot")
+                       for c in base["components"].get(side, [])}
         coloured = {c["r"] for side in ("top", "bot")
                     for c in base["components"].get(side, [])
                     if any(g.get("cls") for g in (c.get("pp") or []))}
@@ -646,9 +684,21 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
             # reader most wants is blank and the build was silent about it.
             if hid == GPIO_HEADER_KEY:
                 if not any(placed.get(r) == GPIO_HEADER_PINS for r in placed):
+                    # The SAME three cases as below. Printing "no part here has
+                    # 40 pads" was the vague wording this block was written to
+                    # replace, reintroduced seven lines above the replacement:
+                    # AML-S805X-AC's 7J1 exists, with pin_count 40, and simply
+                    # carries no pad geometry.
+                    named = [r for r, c in pins_by_ref.items()
+                             if c == GPIO_HEADER_PINS]
+                    if named:
+                        why = (f"{', '.join(sorted(named))} has "
+                               f"{GPIO_HEADER_PINS} pins but no pad geometry")
+                    else:
+                        why = f"no part here has {GPIO_HEADER_PINS} pins"
                     print(f"note {meta['id']}: the {GPIO_HEADER_PINS}-pin header "
-                          f"is documented but no part here has "
-                          f"{GPIO_HEADER_PINS} pads to colour", file=sys.stderr)
+                          f"is documented but not coloured ({why})",
+                          file=sys.stderr)
                 continue
             if hid in coloured:
                 continue
