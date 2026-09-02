@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:33177aaeaf6c935ce622b6512b18b6ee3d2d2ded6b3d0bc24a39263911c046db */
+/* lc-kit 1 sha256:9de298cfc14ad36d7ca1609bb655e2539a31b48f91a143808bd60d56bfd93b55 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout and the board
    layout viewer.
  *
@@ -331,10 +331,23 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 .lc-theme-btn[data-theme="light"],
 .lc-theme-btn[data-theme="dark"] { border-color: currentColor; }
 
+/* THE THEME CONTROL KEEPS THE CORNER. The topbar wraps, and the button is its
+   last child, so on a narrow screen it wrapped onto a line of its own below
+   the board picker and the search box -- the one control whose position a
+   reader relies on, moving with the content around it. Pinned to the top
+   right, it is where it is on a desktop, and the row it used to occupy goes
+   back to the page. The padding reserves its width so a long select cannot
+   run underneath. */
+@media (max-width: 820px) {
+  .lc-topbar { position: relative; padding-right: 104px; }
+  .lc-theme-btn { position: absolute; top: 8px; right: 16px; }
+}
+
 @media (max-width: 560px) {
   /* The label goes before the control does: the icon plus the title attribute
      still say which state is active. */
   .lc-theme-label { display: none; }
+  .lc-topbar { padding-right: 56px; }
 }
 
 /* ---- notices ----------------------------------------------------------- */
