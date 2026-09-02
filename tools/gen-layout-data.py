@@ -180,6 +180,7 @@ def dedupe_path(segs):
 
 
 GPIO_HEADER_PINS = 40
+GPIO_HEADER_KEY = "__gpio40__"   # not a refdes: the two sites disagree on that
 
 
 def _pinout_primary_class(pinout_dir):
@@ -253,15 +254,89 @@ def read_uart_header(data):
     pinout draws green like any other GPIO, and this is about the header a
     cable goes onto.
     """
+    out = {}
     for h in data.get("headers", []):
         pins = h.get("pins") or []
         if len(pins) != 3 or not h.get("id"):
             continue
         wires = {str(p["pin"]): _uart_wire(p) for p in pins
                  if p.get("pin") is not None}
+        # EVERY qualifying header, not the first. This returned from inside the
+        # loop, so a board could only ever have one console header -- and the
+        # MediaTek pair have two apiece (J3 on UART1, J4004 on UART0). Nothing
+        # was visibly wrong only because neither board has a published pinout;
+        # publish one and the second header would have stayed brass in silence.
         if set(wires.values()) == {"wire-gnd", "wire-tx", "wire-rx"}:
-            return {h["id"]: wires}
-    return {}
+            out[h["id"]] = wires
+    return out
+
+
+NET_GND = re.compile(r"(^|_)(D_)?GND(\d*)$|(^|_)GND(_|$)", re.IGNORECASE)
+NET_TX = re.compile(r"(^|_)U?[A-Z]*TXD?\d*(_|$)|(^|_)TX(_|$)", re.IGNORECASE)
+NET_RX = re.compile(r"(^|_)U?[A-Z]*RXD?\d*(_|$)|(^|_)RX(_|$)", re.IGNORECASE)
+
+
+def uart_headers_from_nets(raw):
+    """Console headers found in the board's OWN netlist, for boards with no
+    published pinout.
+
+    The colour rule reads the pinout site, which is right when there is one --
+    that site is where a pin's function is decided. But four of the ten boards
+    have no pinout, and two of them name the answer in the file being rendered:
+    MED-MT83-ACE and MTK-G500-MMD carry `D_GND` / `UART1_TX` / `UART1_RX` on J3
+    and `D_GND` / `UTXD0` / `URXD0` on J4004. Those are exactly the ground +
+    TX + RX the rule tests for, and both drew brass because the only place
+    consulted was a file that does not exist.
+
+    ONLY as a fallback, and only on a 3-pad connector whose three nets are one
+    ground, one transmit and one receive -- nothing is guessed from a pin
+    count or a position. A board like MED-MT88-MX, whose `J180` is a 3-pin
+    header with no signal names to read, stays brass: undecidable from this
+    repo is a reason to draw nothing, not to guess.
+    """
+    nets = raw.get("nets") or {}
+    pin_nets = raw.get("pin_nets") or []
+    if not nets or not pin_nets:
+        return {}
+    at = {}
+    for i in range(0, len(pin_nets) - 2, 3):
+        at[(round(pin_nets[i], 3), round(pin_nets[i + 1], 3))] = pin_nets[i + 2]
+
+    def net_name(x, y):
+        nid = at.get((round(x, 3), round(y, 3)))
+        if nid is None:
+            return ""
+        return str(nets.get(str(nid), nets.get(nid, "")) or "")
+
+    found = {}
+    layers = raw.get("layers") or {}
+    for side in ("top", "bot"):
+        for c in (layers.get(side) or {}).get("components", []):
+            pp = c.get("pin_pads")
+            if not pp or c.get("category") != "connector":
+                continue
+            pads = []
+            for g in pp.get("groups", []):
+                pos = g.get("positions") or []
+                names = g.get("pins") or []
+                for i, n in enumerate(names):
+                    pads.append((str(n), pos[2 * i], pos[2 * i + 1]))
+            if len(pads) != 3:
+                continue
+            wires = {}
+            for pin, x, y in pads:
+                nm = net_name(x, y)
+                if not nm:
+                    break
+                if NET_GND.search(nm):
+                    wires[pin] = "wire-gnd"
+                elif NET_TX.search(nm):
+                    wires[pin] = "wire-tx"
+                elif NET_RX.search(nm):
+                    wires[pin] = "wire-rx"
+            if set(wires.values()) == {"wire-gnd", "wire-tx", "wire-rx"}:
+                found[c["refdes"]] = wires
+    return found
 
 
 def read_uart_classes(pinout_dir, board_id):
@@ -303,22 +378,43 @@ def read_pin_classes(pinout_dir, board_id, primary_class=None):
     if not path.exists():
         return {}
     data = json.loads(path.read_bytes())
-    sized = [h for h in data.get("headers", [])
-             if len(h.get("pins", [])) == GPIO_HEADER_PINS]
-    if len(sized) != 1:
-        return {}
-    out = {}
-    for p in sized[0]["pins"]:
-        if p.get("pin") is None:
-            continue
-        # `primary` once the pinout publishes it; until then, its generator's
-        # own function applied to the same inputs. Never `cls` -- that is a
-        # different question's answer.
-        cls = p.get("primary")
-        if not cls and primary_class:
-            cls = primary_class(p.get("type"), p.get("cls"), p.get("funcs") or [])
-        if cls:
-            out[str(p["pin"])] = cls
+
+    def classes(header):
+        m = {}
+        for p in header.get("pins", []):
+            if p.get("pin") is None:
+                continue
+            # `primary` once the pinout publishes it; until then, its
+            # generator's own function applied to the same inputs. Never `cls`
+            # -- that is a different question's answer.
+            cls = p.get("primary")
+            if not cls and primary_class:
+                cls = primary_class(p.get("type"), p.get("cls"),
+                                    p.get("funcs") or [])
+            if cls:
+                m[str(p["pin"])] = cls
+        return m
+
+    headers = data.get("headers", [])
+    sized = [h for h in headers if len(h.get("pins", [])) == GPIO_HEADER_PINS]
+    out = {GPIO_HEADER_KEY: classes(sized[0])} if len(sized) == 1 else {}
+
+    # The SMALLER documented headers, keyed by their own id. These were skipped
+    # wholesale, justified by AML-S905X-CC-V2's 2J3 being 8 pins against 7
+    # pads. That was never a pin-count disagreement -- the header's pads arrive
+    # in two SHAPE groups, 7 round and 1 square pin 1, and the comparison was
+    # against a group instead of the part. Counted per part, 2J3 is 8 against 8
+    # on both V2 and V3, so the stated reason has not held since the pad count
+    # moved to the component.
+    #
+    # Matched on refdes AND total pad count, so the pairs where the two sites
+    # disagree about what a connector is called simply do not match: the
+    # pinout's 9J1 is a 3-pin header while the layout's 9J1 is a 19-pad part.
+    for h in headers:
+        if h.get("id") and len(h.get("pins", [])) != GPIO_HEADER_PINS:
+            m = classes(h)
+            if m:
+                out[h["id"]] = m
     return out
 
 
@@ -380,11 +476,16 @@ def pack_component(c, problems, where, pinclasses=None, uartclasses=None):
         # neither and silently coloured nothing.
         pads = sum(len(g.get("pins") or []) for g in groups)
         wires = (uartclasses or {}).get(c["refdes"])
+        by_id = (pinclasses or {}).get(c["refdes"])
         colours = None
-        if pinclasses and pads == GPIO_HEADER_PINS:
-            colours = pinclasses
-        elif wires and pads == len(wires):
+        if wires and pads == len(wires):
+            # The console header first: it is also a documented header, and the
+            # cable colours are the more specific answer for it.
             colours = wires
+        elif pinclasses and pads == GPIO_HEADER_PINS:
+            colours = pinclasses.get(GPIO_HEADER_KEY)
+        elif by_id and pads == len(by_id):
+            colours = by_id
 
         packed_groups = []
         for g in groups:
@@ -459,6 +560,10 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
     pinclasses = (read_pin_classes(pinout_dir, meta["id"], primary_class)
                   if pinout_dir else {})
     uartclasses = read_uart_classes(pinout_dir, meta["id"]) if pinout_dir else {}
+    # The pinout is authoritative where it exists; the board's own netlist
+    # answers only for the headers it did not cover.
+    for _ref, _wires in uart_headers_from_nets(raw).items():
+        uartclasses.setdefault(_ref, _wires)
 
     layers = raw.get("layers") or {"top": {"components": raw.get("components", []),
                                            "categories": raw.get("categories", {})}}
@@ -488,6 +593,26 @@ def convert(meta, src_path, out_dir, dry_run, pinout_dir=None, primary_class=Non
                            uartclasses)
             for c in lay.get("components", [])
         ]
+
+    # SAY when a documented header found no part to colour. The two sites do
+    # not always agree what a connector is called -- the pinout's 9J5 does not
+    # exist in AML-S805X-AC-V2's CAD (the part is 9J2), and its 9J1 is a 3-pin
+    # header where the layout's 9J1 has 19 pads -- and matching on refdes plus
+    # pad count means such a header silently colours nothing. Silent is the
+    # problem: a mismatch is worth knowing about, and the alternative to
+    # matching strictly is colouring the wrong part.
+    if pinclasses:
+        placed = {c["r"]: sum(len(g.get("pos", [])) // 2 for g in (c.get("pp") or []))
+                  for side in ("top", "bot") for c in base["components"][side]}
+        for hid, m in pinclasses.items():
+            if hid == GPIO_HEADER_KEY:
+                continue
+            if placed.get(hid) != len(m):
+                got = placed.get(hid)
+                print(f"note {meta['id']}: pinout header {hid} ({len(m)} pins) "
+                      f"matched no part " +
+                      (f"({hid} has {got} pads here)" if got is not None
+                       else f"(no {hid} in this CAD)"), file=sys.stderr)
 
     copper = [pack_copper(c) for c in raw.get("copper", [])]
     base["copper_index"] = [

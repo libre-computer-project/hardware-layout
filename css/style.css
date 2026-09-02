@@ -103,7 +103,23 @@ body { overflow: hidden; }
 }
 .comp-item .fp { color: var(--text-dim); margin-left: 6px; }
 
+/* The detail panel is the answer to clicking a part, and it sat below every
+   other sidebar block -- measured at y=1164 in a 1080-high viewport, so on a
+   laptop the reader clicked a part and nothing appeared to happen. It is
+   pulled to the top of the sidebar when it has content, which is the moment it
+   is the thing being looked at. */
 #detail { margin-top: 10px; }
+#detail:not(:empty) {
+  order: -1;
+  margin-top: 0;
+  margin-bottom: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg);
+  padding-bottom: 8px;
+}
+#sidebar { display: flex; flex-direction: column; }
 #detail h4 {
   margin: 0 0 6px;
   font: 700 14px ui-monospace, SFMono-Regular, Menlo, monospace;

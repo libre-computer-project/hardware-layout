@@ -51,6 +51,7 @@ const els = {
   sideSeg: $("side-seg"),
   copper: $("copper-toggles"),
   copperNote: $("copper-note"),
+  keys: $("keys"),
   cats: $("cat-toggles"),
   list: $("comp-list"),
   detail: $("detail"),
@@ -306,7 +307,25 @@ function setSide(key) {
   draw();
 }
 
+/* The key hint, per board. It used to be static markup promising "1-8 copper ·
+   right-click a pad for its net" on every board -- which is one layer too many
+   on the six-layer boards, where 7 and 8 are guarded no-ops, and simply untrue
+   on the board imported from a mechanical model, which has no copper and no
+   netlist and says so two panels away. */
+function buildKeyHint() {
+  const n = (board.copper_index || []).length;
+  const bits = ["<kbd>F</kbd> fit", "<kbd>T</kbd>/<kbd>B</kbd> side"];
+  if (n === 1) bits.push("<kbd>1</kbd> copper");
+  else if (n > 1) bits.push(`<kbd>1</kbd>–<kbd>${n}</kbd> copper`);
+  if (Object.keys(board.nets || {}).length) {
+    bits.push("right-click a pad for its net");
+  }
+  bits.push("<kbd>Esc</kbd> clear");
+  els.keys.innerHTML = bits.join(" · ");
+}
+
 function buildCopperToggles() {
+  buildKeyHint();
   els.copper.textContent = "";
   const layers = board.copper_index || [];
   if (!layers.length) {
@@ -504,7 +523,7 @@ const by = (py) => -(py - vy) / vs;
  * bottom they are what is there. Vias are not in the data -- they are the
  * overwhelming majority of hits and not what a reader is looking for.
  */
-function drawHoles(cuOn) {
+function drawHoles(cuOn, only) {
   const h = board.holes;
   if (!h || !h.length) return;
   /* Same two colours the mounting hole's own bore uses: the board's colour
@@ -517,6 +536,8 @@ function drawHoles(cuOn) {
   for (let i = 0; i < h.length; i += 3) {
     const r = (h[i + 2] * vs) / 2;
     if (r < 0.6) continue;            /* below a pixel it is a smudge */
+    if (only && (Math.abs(h[i] - only.x) > only.w / 2 ||
+                 Math.abs(h[i + 1] - only.y) > only.h / 2)) continue;
     ctx.beginPath();
     ctx.arc(sx(h[i]), sy(h[i + 1]), r, 0, Math.PI * 2);
     ctx.fill();
@@ -551,6 +572,18 @@ function draw() {
     return s !== 0 ? s : (a.w * a.h) - (b.w * b.h);
   });
   for (const c of order) drawPart(c, cuOn);
+
+  /* A selected part is drawn opaque, which hides any hole underneath it. That
+     is fine where the part draws its own pads over its own bores -- but on the
+     DXF board there are no pads to draw, so selecting the 40-pin header turned
+     it into a solid block with no pins at all, and the bores that were visible
+     through the translucent body a moment earlier disappeared. Re-draw just
+     that part's holes on top of it. */
+  if (selected) {
+    const c = comps().find((x) => x.r === selected);
+    if (c && !c.pp) drawHoles(cuOn, c);
+  }
+
 
   drawNet();
   updateHud();
@@ -876,14 +909,51 @@ function drawPart(c, cuOn) {
         if (g.cls) {
           const cls = g.cls[i / 2];
           const col = cls ? cssVar("--c-" + cls) : "";
-          ctx.fillStyle = col ? (isSel ? lighten(col) : col) : brass;
+          /* Selection lightens a colour to say "this one" -- but the cable
+             colours are not a palette, they are what the wire IS, and a
+             lightened black lead came out mid-grey (#404246) in the state a
+             reader lands in straight after searching for the header. A wire
+             colour is passed through untouched; the selection is already said
+             by the outline. */
+          const wire = cls && cls.startsWith("wire-");
+          ctx.fillStyle = col ? (isSel && !wire ? lighten(col) : col) : brass;
         }
-        if (g.sh === "r" || g.sh === "s") {
+        if (g.sh === "r") {
           ctx.beginPath(); ctx.arc(px, py, Math.max(pw, ph) / 2, 0, Math.PI * 2); ctx.fill();
+        } else if (g.sh === "s") {
+          /* SQUARE, and it matters: on a through-hole connector the square pad
+             is pin 1. This drew it with the same arc() as a round pad, so the
+             one pin-1 cue still in the data was erased on 44 pads across the
+             boards -- and on the header whose silkscreen triangle is missing
+             there was then no cue at all. */
+          const s = Math.max(pw, ph);
+          ctx.fillRect(px - s / 2, py - s / 2, s, s);
         } else if (g.sh === "oval") {
           ctx.beginPath(); ctx.ellipse(px, py, pw / 2, ph / 2, 0, 0, Math.PI * 2); ctx.fill();
         } else {
           ctx.fillRect(px - pw / 2, py - ph / 2, pw, ph);
+        }
+      }
+      /* Fingers that touch need a seam. A SODIMM's 262 contacts sit on a
+         0.25 mm pitch with 0.35 mm pads, so every neighbour overlaps by
+         0.10 mm and the row fills to one solid brass bar -- countable at no
+         zoom. The pads are the CAD's, so the size stays; what is added is a
+         hairline of the board between them, which is what solder mask does
+         anyway. Only when the pads are actually big enough to read. */
+      if (Math.min(pw, ph) > 2.5 && g.pos.length > 4) {
+        ctx.strokeStyle = cssVar(cuOn ? "--board-cu" : "--board");
+        ctx.lineWidth = 0.7;
+        for (let i = 0; i < g.pos.length; i += 2) {
+          const px = sx(g.pos[i]), py = sy(g.pos[i + 1]);
+          if (g.sh === "r") {
+            ctx.beginPath();
+            ctx.arc(px, py, Math.max(pw, ph) / 2, 0, Math.PI * 2);
+            ctx.stroke();
+          } else if (g.sh !== "oval") {
+            const w2 = g.sh === "s" ? Math.max(pw, ph) : pw;
+            const h2 = g.sh === "s" ? Math.max(pw, ph) : ph;
+            ctx.strokeRect(px - w2 / 2, py - h2 / 2, w2, h2);
+          }
         }
       }
     }

@@ -57,10 +57,11 @@
     <canvas id="canvas"></canvas>
     <div id="tooltip" hidden></div>
     <div id="hud"></div>
-    <div id="keys">
-      <kbd>F</kbd> fit · <kbd>T</kbd>/<kbd>B</kbd> side · <kbd>1</kbd>–<kbd>8</kbd> copper ·
-      right-click a pad for its net · <kbd>Esc</kbd> clear
-    </div>
+    <!-- The copper and net parts are filled in per board: the layer count
+         differs (6 or 8), and the board imported from a mechanical model has
+         neither, where this used to promise both and contradict the sidebar's
+         own "This export carries no copper layers". -->
+    <div id="keys"></div>
     <div id="spinner" hidden>Loading…</div>
   </div>
 </div>
