@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:f269af8b8e7bb6d029a957d84c7e665b3f058fbf3bdbd769aa7bbfde6c5f915b */
+/* lc-kit 1 sha256:47fd75360958e581c483d4e935e3341e5d1ad99d924cfbeb126bf60587bf3a0b */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -375,6 +375,56 @@ input[type="search"]::placeholder { color: var(--text-dim); }
      still say which state is active. */
   .lc-theme-label { display: none; }
   .lc-topbar { padding-right: 56px; }
+}
+
+/* THE NARROW BAR IS DELIBERATE ROWS, not whatever wrapping leaves. Below the
+   desktop width the brand and the site links share the first row with the
+   pinned theme button, whose width that row (and only that row) reserves; the
+   controls get the next row and start at the left edge instead of floating
+   right. The site links never wrap: a wrapped bar put one link and a dangling
+   separator on a line of their own. When they do not fit they scroll
+   sideways. Every link and control is at least 40px tall, the touch minimum.
+   819.98px, not 820px: at exactly 820 the bar keeps the layout it already had
+   there. */
+@media (max-width: 819.98px) {
+  .lc-topbar { padding: 8px 16px 10px; row-gap: 6px; }
+  .lc-brand {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0 14px;
+    padding-right: 88px;
+  }
+  .lc-brand-name { flex: none; min-height: 40px; }
+  .lc-theme-btn { min-width: 40px; min-height: 40px; justify-content: center; }
+
+  /* No visible scrollbar: it would sit on top of the links. */
+  .lc-sites {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .lc-sites::-webkit-scrollbar { display: none; }
+  .lc-site { display: inline-block; padding: 10px 0; line-height: 20px; }
+
+  .lc-controls { flex: 1 1 100%; margin-left: 0; }
+  .lc-controls select,
+  .lc-controls input { min-height: 40px; }
+}
+
+/* A phone has no room for the links beside the brand, so they take a row of
+   their own under it, and the theme button keeps the brand row's corner. The
+   row bleeds to the screen edges, so a link scrolled under the edge is cut by
+   the screen rather than by the bar's padding -- the cut-off word is the cue
+   that the row scrolls. */
+@media (max-width: 699.98px) {
+  .lc-brand { flex-wrap: wrap; padding-right: 0; }
+  .lc-sites {
+    flex: 0 0 calc(100% + 32px);
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
 }
 
 /* ---- notices ----------------------------------------------------------- */
