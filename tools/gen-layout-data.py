@@ -70,7 +70,7 @@ BOARDS = [
          soc="S805X", vendor="Amlogic", status="production", hidden=False,
          rev="V1.0", src="AML-S805X-AC-TOP-190308.json"),
     dict(id="aml-s805x-ac-v2", model="AML-S805X-AC-V2", name="Das Frite",
-         soc="S805X", vendor="Amlogic", status="unreleased", hidden=True,
+         soc="S805X", vendor="Amlogic", status="production", hidden=False,
          rev="V2.0C", src="AML-S805X-AC-V2.0C-0803.json"),
     # Alta and Solitude are ONE PCB. Their two ODB++ archives differ (different
     # job names, exported four minutes apart) but every field this site reads

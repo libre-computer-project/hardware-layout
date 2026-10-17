@@ -65,8 +65,8 @@
    "rev": "V2.0C",
    "soc": "S805X",
    "vendor": "Amlogic",
-   "status": "unreleased",
-   "hidden": true,
+   "status": "production",
+   "hidden": false,
    "size_mm": [
     56,
     65

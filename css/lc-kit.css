@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:6b261dd3db1e4b2479c15ca421f66a81412391cbf9bf50ea64606e6db7001f61 */
+/* lc-kit 1 sha256:8ed138b1f2d5bcdfa6fe57d21d5a67437136b5cc2a6cf2cea684c6ca8c291eb0 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -102,8 +102,9 @@ a:hover { text-decoration: underline; }
 
 .lc-brand {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 9px;
+  gap: 4px 9px;
   min-width: 0;
 }
 
@@ -223,10 +224,14 @@ html.dark {
    says what the other one is, which a visitor otherwise has no way to find out
    from here. The current tool stays plain text: a link to the page you are on
    is a dead control that costs a click to discover. */
+/* The site links wrap. Five sites in one unbreakable row ran 131px past a
+   375px phone and dragged every page sideways; wrapped, the row simply gets
+   taller. The brand wraps for the same reason. */
 .lc-sites {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 10px;
+  gap: 4px 10px;
   font-size: 13px;
   min-width: 0;
 }
