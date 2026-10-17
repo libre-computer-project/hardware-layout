@@ -70,7 +70,8 @@ body { overflow: hidden; }
   padding: 1px 6px;
   border-radius: 3px;
   font-size: 11px;
-  background: var(--bg-sunken);
+  /* Sunken put the caution words and the same-PCB link under body text. */
+  background: var(--bg);
   border: 1px solid var(--border);
 }
 #board-meta .status.unlisted { color: var(--warn); border-color: var(--warn); }
@@ -99,8 +100,11 @@ body { overflow: hidden; }
 .comp-item:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .comp-item[aria-selected="true"] {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--accent);
+  /* Accent ink on this wash is too light for 12px type, and so is the
+     dimmed footprint. The wash is the selection; the words are page ink. */
+  color: var(--text);
 }
+.comp-item[aria-selected="true"] .fp { color: var(--text); }
 .comp-item .fp { color: var(--text-dim); margin-left: 6px; }
 
 /* The detail panel is the answer to clicking a part, and it sat below every
@@ -181,7 +185,10 @@ body { overflow: hidden; }
   align-items: center;
   font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-#hud .net { color: var(--net-hi); }
+/* The highlight green is the canvas mark. As 11px type on the light HUD
+   it is too light. The dark theme's green clears, so it keeps the name. */
+#hud .net { color: var(--text); font-weight: 700; }
+html.dark #hud .net { color: var(--net-hi); }
 #keys { right: 12px; font-size: 11px; }
 #keys kbd {
   font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;

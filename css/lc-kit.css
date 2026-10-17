@@ -1,6 +1,6 @@
-/* lc-kit 1 sha256:9de298cfc14ad36d7ca1609bb655e2539a31b48f91a143808bd60d56bfd93b55 */
-/* Libre Computer hardware-tool shell — shared by the GPIO pinout and the board
-   layout viewer.
+/* lc-kit 1 sha256:6b261dd3db1e4b2479c15ca421f66a81412391cbf9bf50ea64606e6db7001f61 */
+/* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
+   layout viewer and the power tree.
  *
  * These two sites had grown the same header, the same board picker, the same
  * search box and the same footer twice, with the same seven token names holding
@@ -264,7 +264,10 @@ a.lc-site:focus-visible {
   padding: 1px 7px;
   border-radius: 999px;
   background: var(--warn);
-  color: #fff;
+  /* Page ground, not white. White clears on the light caution brown and
+     fails on the dark theme's bright caution orange; the dark ground on
+     that orange clears. */
+  color: var(--bg);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .3px;
@@ -366,7 +369,9 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   background: color-mix(in srgb, var(--danger) 14%, var(--bg));
 }
 .lc-notice code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.lc-notice a { text-decoration: underline; }
+/* The accent on the caution wash is too light for the notice's type.
+   The underline is what says the words are a link. */
+.lc-notice a { color: var(--text); text-decoration: underline; }
 
 /* ---- footer ------------------------------------------------------------ */
 
@@ -418,7 +423,9 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 .lc-seg button[aria-pressed="true"] {
   background: color-mix(in srgb, var(--accent) 16%, var(--bg));
   border-color: var(--accent);
-  color: var(--accent);
+  /* The accent is the border and the wash. As 12px ink on the light wash
+     it is too light. The words stay page ink in both themes. */
+  color: var(--text);
 }
 
 .lc-toggle {
@@ -438,7 +445,10 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   cursor: pointer;
 }
 .lc-toggle:hover { background: var(--bg-sunken); }
-.lc-toggle[aria-pressed="false"] { opacity: .42; }
+/* Off is dimmer type and a faded swatch, not a faded control. Opacity on
+   the whole row takes the label below body text in both themes. */
+.lc-toggle[aria-pressed="false"] { color: var(--text-dim); }
+.lc-toggle[aria-pressed="false"] .lc-swatch { opacity: .45; }
 .lc-toggle .lc-swatch { flex: none; width: 11px; height: 11px; border-radius: 2px; }
 .lc-toggle .lc-name {
   flex: 1;
