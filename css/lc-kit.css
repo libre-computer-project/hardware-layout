@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:47fd75360958e581c483d4e935e3341e5d1ad99d924cfbeb126bf60587bf3a0b */
+/* lc-kit 1 sha256:3826ac490290828bea026f076ec9db5f6634e213db90dc56bda41ad94e5b64cb */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -100,10 +100,15 @@ a:hover { text-decoration: underline; }
   z-index: 10;
 }
 
+/* CENTRED, NOT BASELINE-ALIGNED. The name's first flex item is the logo, an
+   empty box, so the name's baseline is synthesised from the logo's bottom edge
+   -- and baseline alignment sat the site links' text on that edge, about 6px
+   below the brand text and the controls. Centring puts the logo, the name, the
+   links and (via the bar's own centring) the controls on one centre line. */
 .lc-brand {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 4px 9px;
   min-width: 0;
 }
