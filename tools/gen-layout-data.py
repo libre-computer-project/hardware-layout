@@ -99,6 +99,19 @@ BOARDS = [
     dict(id="mtk-g500-mmd", model="G500 MMD", name="MT8385 MMD reference",
          soc="MT8385", vendor="MediaTek", status="reference", hidden=True,
          rev="V1", src="G500_MT8385_MMD_LPDDR4X_eMMC_V1_0928A.json"),
+    # Renegade V2 and Tritium, like La Frite, have no ODB++ export and are
+    # imported from their PADS mechanical DXF pairs (placement, pads and holes;
+    # no netlist, no copper). Tritium's pair is the H5 build of the one PCB the
+    # H2+, H3 and H5 variants share. Renegade (V1) and Renegade Elite are not
+    # here: the only Renegade V1 DXF is the 2017 pre-production TF-RK3328MINI
+    # V02 layout, not the V1.3-B board that ships, and the Renegade Elite DXF
+    # carries pads and silkscreen but no part designators.
+    dict(id="roc-rk3328-cc-v2", model="ROC-RK3328-CC-V2", name="Renegade",
+         soc="RK3328", vendor="Rockchip", status="production", hidden=False,
+         rev="V2.0C", src="TF-XD-RK3328-CC-V2.0C-20221110-TOP.json"),
+    dict(id="all-h3-cc", model="ALL-H3-CC", name="Tritium",
+         soc="H2+/H3/H5", vendor="Allwinner", status="production", hidden=False,
+         rev="V1.1", src="ALL-H3-CC-H5-V1.1-220802-TOP.json"),
 ]
 
 # --- disclosure backstop ----------------------------------------------------

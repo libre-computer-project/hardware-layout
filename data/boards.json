@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02",
+ "generated": "2026-10-26",
  "boards": [
   {
    "id": "aml-s905x-cc-v2",
@@ -191,6 +191,44 @@
    "parts": {
     "top": 356,
     "bot": 303
+   }
+  },
+  {
+   "id": "roc-rk3328-cc-v2",
+   "model": "ROC-RK3328-CC-V2",
+   "name": "Renegade",
+   "rev": "V2.0C",
+   "soc": "RK3328",
+   "vendor": "Rockchip",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    85,
+    56
+   ],
+   "layers": 0,
+   "parts": {
+    "top": 281,
+    "bot": 214
+   }
+  },
+  {
+   "id": "all-h3-cc",
+   "model": "ALL-H3-CC",
+   "name": "Tritium",
+   "rev": "V1.1",
+   "soc": "H2+/H3/H5",
+   "vendor": "Allwinner",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    84,
+    56
+   ],
+   "layers": 0,
+   "parts": {
+    "top": 162,
+    "bot": 147
    }
   }
  ]

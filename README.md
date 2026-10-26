@@ -34,8 +34,8 @@ mechanical one.
 
 | Source | Boards | Placement | Copper | Nets |
 |---|---|---|---|---|
-| ODB++ | all but La Frite | 🟢 | 🟢 8 layers | 🟢 |
-| PADS mechanical DXF | La Frite (`AML-S805X-AC`) | 🟢 | 🔴 none | 🔴 none |
+| ODB++ | all but the three below | 🟢 | 🟢 8 layers | 🟢 |
+| PADS mechanical DXF | La Frite (`AML-S805X-AC`), Renegade (`ROC-RK3328-CC-V2`), Tritium (`ALL-H3-CC`) | 🟢 | 🔴 none | 🔴 none |
 
 A CAD export carries a good deal that describes how a board was drawn rather
 than what it is, and none of that is needed to draw a board. Per-component
