@@ -238,8 +238,8 @@
    "rev": "V2.0C",
    "soc": "RK3328",
    "vendor": "Rockchip",
-   "status": "production",
-   "hidden": false,
+   "status": "unreleased",
+   "hidden": true,
    "size_mm": [
     85,
     56

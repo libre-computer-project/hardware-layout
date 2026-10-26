@@ -117,10 +117,12 @@ BOARDS = [
     # Renegade V2 and Tritium, like La Frite, have no ODB++ export and are
     # imported from their PADS mechanical DXF pairs (placement, pads and holes;
     # no netlist, no copper). Tritium's pair is the H5 build of the one PCB the
-    # H2+, H3 and H5 variants share. Renegade Elite is not here: its DXF
-    # carries pads and silkscreen but no part designators.
+    # H2+, H3 and H5 variants share. Renegade V2 is a production design that
+    # has not been released, so it is unlisted like V3 of Le Potato. Renegade
+    # Elite is not here: its DXF carries pads and silkscreen but no part
+    # designators.
     dict(id="roc-rk3328-cc-v2", model="ROC-RK3328-CC-V2", name="Renegade",
-         soc="RK3328", vendor="Rockchip", status="production", hidden=False,
+         soc="RK3328", vendor="Rockchip", status="unreleased", hidden=True,
          rev="V2.0C", src="TF-XD-RK3328-CC-V2.0C-20221110-TOP.json"),
     dict(id="all-h3-cc", model="ALL-H3-CC", name="Tritium",
          soc="H2+/H3/H5", vendor="Allwinner", status="production", hidden=False,
