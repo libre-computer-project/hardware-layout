@@ -213,6 +213,25 @@
    }
   },
   {
+   "id": "roc-rk3328-cc",
+   "model": "ROC-RK3328-CC",
+   "name": "Renegade",
+   "rev": "V1.3-B",
+   "soc": "RK3328",
+   "vendor": "Rockchip",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    85,
+    56
+   ],
+   "layers": 0,
+   "parts": {
+    "top": 273,
+    "bot": 212
+   }
+  },
+  {
    "id": "roc-rk3328-cc-v2",
    "model": "ROC-RK3328-CC-V2",
    "name": "Renegade",
