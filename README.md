@@ -34,8 +34,9 @@ mechanical one.
 
 | Source | Boards | Placement | Copper | Nets |
 |---|---|---|---|---|
-| ODB++ | all but the three below | 🟢 | 🟢 8 layers | 🟢 |
+| ODB++ | all but the four below | 🟢 | 🟢 8 layers | 🟢 |
 | PADS mechanical DXF | La Frite (`AML-S805X-AC`), Renegade (`ROC-RK3328-CC-V2`), Tritium (`ALL-H3-CC`) | 🟢 | 🔴 none | 🔴 none |
+| Fab package (pick-and-place + gerbers) | Le Potato (`AML-S905X-CC`) | 🟡 measured extents; a few parts fall back to decal size | 🔴 none | 🔴 none |
 
 A CAD export carries a good deal that describes how a board was drawn rather
 than what it is, and none of that is needed to draw a board. Per-component

@@ -56,6 +56,13 @@ from pathlib import Path
 # design derives from it.
 
 BOARDS = [
+    # Le Potato has neither ODB++ nor a mechanical DXF and is imported from its
+    # fab package instead -- the pick-and-place spreadsheet and the gerbers it
+    # was manufactured from (pcb_fab.py). Placement and measured part extents
+    # only: no copper routing and no netlist, `layers` 0 like La Frite.
+    dict(id="aml-s905x-cc", model="AML-S905X-CC", name="Le Potato",
+         soc="S905X", vendor="Amlogic", status="production", hidden=False,
+         rev="V1.0-A", src="AML-S905X-CC-V1.0-A_180611.json"),
     dict(id="aml-s905x-cc-v2", model="AML-S905X-CC-V2", name="Sweet Potato",
          soc="S905X", vendor="Amlogic", status="production", hidden=False,
          rev="V2.0-C", src="AML-S905X-CC-V2.0-C_20230418.json"),

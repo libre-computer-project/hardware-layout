@@ -2,6 +2,25 @@
  "generated": "2026-10-26",
  "boards": [
   {
+   "id": "aml-s905x-cc",
+   "model": "AML-S905X-CC",
+   "name": "Le Potato",
+   "rev": "V1.0-A",
+   "soc": "S905X",
+   "vendor": "Amlogic",
+   "status": "production",
+   "hidden": false,
+   "size_mm": [
+    84,
+    56
+   ],
+   "layers": 0,
+   "parts": {
+    "top": 157,
+    "bot": 220
+   }
+  },
+  {
    "id": "aml-s905x-cc-v2",
    "model": "AML-S905X-CC-V2",
    "name": "Sweet Potato",
