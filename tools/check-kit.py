@@ -95,10 +95,22 @@ CANONICAL_HEAD = re.compile(
     rf'<!DOCTYPE html>{_WS}<html(?: lang="[a-z-]+")?>{_WS}<head>{_WS}<meta charset="utf-8">{_WS}'
     rf"(?:<!--(?!-?>)(?:(?!--!?>)[^<])*-->{_WS})?"   # one plain comment, no "<", no "<!-->" / "--!>"
     r'<meta http-equiv="Content-Security-Policy" content="([^"<>]*)">')
-# A document a browser runs script in that is not a page of ours: an SVG
-# opened directly has no CSP, so it may carry no script at all.
-SVG_ACTIVE = re.compile(r"<script\b|\son[a-z]+\s*=|javascript:|<foreignObject\b", re.I)
-PAGE_SUFFIXES = {".html", ".htm", ".xhtml"}
+# Documents a browser runs script in, by how the servers (GitHub Pages,
+# nginx) type them:
+#   - HTML pages are checked against the fixed head shape above;
+#   - XHTML is parsed as XML, where a <meta> policy does nothing: refused;
+#   - any other XML (SVG, sitemap, XSL) opened directly runs with no policy,
+#     so it may carry nothing that could run. The test is deliberately
+#     coarse (it over-refuses): no script element in any namespace or prefix,
+#     no event handler, no "javascript", no character reference (which can
+#     spell either), no DTD or entity, no prefixed element, no stylesheet
+#     processing instruction, no foreignObject.
+PAGE_SUFFIXES = {".html", ".htm", ".shtml"}
+XHTML_SUFFIXES = {".xhtml", ".xht"}
+XML_SUFFIXES = {".svg", ".xml", ".xsl", ".xslt"}
+XML_ACTIVE = re.compile(
+    r"script|\son[a-z]+\s*=|javascript|&#|<!DOCTYPE|<!ENTITY|<[A-Za-z_][\w.-]*:|<\?xml-stylesheet|foreignObject",
+    re.I)
 # every inline script a browser could run: any attributes, any case, no src=
 INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
 SCRIPT_DIRECTIVES = ("script-src", "script-src-elem", "script-src-attr")
@@ -183,16 +195,20 @@ def main():
     # every document in the tree a browser could run script in, kit or not
     # (a generated site keeps its pages in directories, a redirect stub is a
     # page too, and tools/ is served as well); only git's own dir is skipped
-    for doc in sorted(p for p in ROOT.rglob("*") if p.is_file()):
+    for doc in sorted(p for p in ROOT.rglob("*") if p.is_file() or p.is_symlink()):
         rel = doc.relative_to(ROOT)
-        if rel.parts[0] in (".git", "node_modules"):
+        if rel.parts[0] == ".git":
             continue
         suffix = doc.suffix.lower()
         if suffix in PAGE_SUFFIXES:
             problems += [f"{rel}: {p}" for p in check_csp(doc.read_text(errors="replace"))]
-        elif suffix == ".svg" and SVG_ACTIVE.search(doc.read_text(errors="replace")):
-            problems.append(f"{rel}: an SVG with script, an event handler, javascript: or "
-                            f"foreignObject (opened directly it runs with no policy)")
+        elif suffix in XHTML_SUFFIXES:
+            problems.append(f"{rel}: XHTML is parsed as XML, where a <meta> policy does nothing")
+        elif suffix in XML_SUFFIXES:
+            m = XML_ACTIVE.search(doc.read_text(errors="replace"))
+            if m:
+                problems.append(f"{rel}: {m.group(0)!r} in an XML document (opened directly it "
+                                f"runs with no policy, so it may carry nothing that could run)")
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)
