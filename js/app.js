@@ -9,7 +9,7 @@
 
 "use strict";
 
-import { mountShell, setBoardLinks, showHiddenFlag, token } from "./lc-kit.js";
+import { boardNotice, mountShell, noteAsked, resolveBoard, setBoardLinks, showHiddenFlag, token } from "./lc-kit.js";
 
 /* Category display names, and the order the sidebar lists them in. The order
    is by how much of the board the class explains, not alphabetical: someone
@@ -116,8 +116,10 @@ async function init() {
   buildSelect();
   markHiddenMode();
 
-  const wanted = params.get("board");
-  const start = visibleBoards.find((b) => b.id === wanted) ||
+  // the board asked for here, else the one the previous tool was asked for
+  const wanted = params.get("asked") || params.get("board");
+  const { id: found, how } = resolveBoard(wanted, visibleBoards.map((b) => b.id));
+  const start = visibleBoards.find((b) => b.id === found) ||
                 visibleBoards.find((b) => b.id === "aml-a311d-cc") ||
                 visibleBoards[0];
   /* A query string cannot 404 — index.html exists, so ?board=<anything> is a
@@ -126,10 +128,9 @@ async function init() {
      looks authoritative whichever board it is. Say so instead. */
   if (wanted && start && start.id !== wanted) {
     const existsButUnlisted = boardIndex.some((b) => b.id === wanted);
-    notice(existsButUnlisted
-      ? `“${wanted}” is not listed publicly. Showing ${start.name} instead.`
-      : `No board “${wanted}”. Showing ${start.name} instead.`);
+    notice(boardNotice(wanted, start.name, how, existsButUnlisted));
   }
+  if (start) noteAsked(wanted, start.id);
   if (!start) {
     notice("The board index is empty.", "error");
     return;
@@ -1308,7 +1309,11 @@ let dragged = false, startX = 0, startY = 0, startVX = 0, startVY = 0;
 let pinchDist = 0, pinchScale = 1;
 
 function wireEvents() {
-  els.select.onchange = () => loadBoard(els.select.value);
+  els.select.onchange = () => {
+    noteAsked(null, null);  // a board picked here is the one asked for now
+    els.notices.textContent = "";  // and the "showing X instead" is past
+    loadBoard(els.select.value);
+  };
   els.search.oninput = (e) => { term = e.target.value; applyFilter(); draw(); };
 
   els.stage.addEventListener("pointerdown", (e) => {

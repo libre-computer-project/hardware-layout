@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:42395219eaf3083c16adec811a0de25b26382d514ba9a0776c8b6f24f057d9b2 */
+/* lc-kit 1 sha256:e7d4f54bc1c13805bbd1eb24d78d513034c309f2ff6ff18fed2d6edfde68264d */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -150,6 +150,50 @@ export function mountShell({ themeButton = true } = {}) {
   return btn;
 }
 
+/* One board, two kinds of id: Tritium is one PCB the layout and power tools
+   draw once (all-h3-cc, also its product slug), fitted with an H3 or an H5,
+   which the pinout tells apart. The only such board; a new one is a row here. */
+const VARIANTS = { "all-h3-cc": ["all-h3-cc-h3", "all-h3-cc-h5"] };
+
+/**
+ * The board a hardware tool opens for `?board=wanted`, among the ids it lists:
+ * the id itself; else a variant of it (Tritium -> Tritium H3, the first);
+ * else the board it is a variant of (Tritium H5 -> Tritium); else null, and
+ * the tool shows its default. `how` says which, for boardNotice.
+ */
+export function resolveBoard(wanted, ids) {
+  if (!wanted) return { id: null, how: null };
+  if (ids.includes(wanted)) return { id: wanted, how: "exact" };
+  const variant = (VARIANTS[wanted] || []).find((v) => ids.includes(v));
+  if (variant) return { id: variant, how: "variant" };
+  const family = Object.keys(VARIANTS).find((f) => VARIANTS[f].includes(wanted) && ids.includes(f));
+  if (family) return { id: family, how: "family" };
+  return { id: null, how: null };
+}
+
+/**
+ * The one sentence every hardware tool shows when it is not showing the board
+ * asked for. `unlisted`: the id exists but only under ?hidden=1.
+ */
+export function boardNotice(wanted, shownName, how, unlisted = false) {
+  if (how === "variant") return `${shownName} shown: this board comes in more than one version; pick another above.`;
+  if (how === "family") return `${shownName} shown: this tool draws its versions as one board.`;
+  return unlisted
+    ? `“${wanted}” is not listed publicly; showing ${shownName}.`
+    : `No board “${wanted}” here; showing ${shownName}.`;
+}
+
+/**
+ * Keep the board the visitor asked for in the address while another is shown
+ * (`?asked=`), for the switcher to carry on; a board picked here clears it.
+ */
+export function noteAsked(wanted, shownId) {
+  const url = new URL(location.href);
+  if (wanted && wanted !== shownId) url.searchParams.set("asked", wanted);
+  else url.searchParams.delete("asked");
+  history.replaceState(null, "", url);
+}
+
 /**
  * Carry the current query across to the other hardware tools (the switcher
  * links marked data-lc-site; sync.py marks only those between the GPIO,
@@ -161,9 +205,9 @@ export function mountShell({ themeButton = true } = {}) {
  * no layout CAD, the layout has pre-production boards with no pinout, the
  * power tree draws fewer still -- but no tool fails silently on an id it
  * lacks: each falls back to its default and says which board it is showing
- * and why. So the query is passed through whole rather than filtered against
- * a list of another tool's boards, which would be a second copy of that
- * catalogue to keep in step.
+ * and why (resolveBoard, boardNotice). So the board is passed through rather
+ * than filtered against a list of another tool's boards, which would be a
+ * second copy of that catalogue to keep in step.
  *
  * The href cannot be computed once at mount. Each tool keeps the selected board
  * in the URL with history.replaceState, which fires no event, so a link built
@@ -183,8 +227,22 @@ export function mountSiteSwitch(root = document) {
   const bases = new WeakMap(); // the tool's own address, before any query
   for (const a of links) bases.set(a, a.href.split(/[?#]/)[0]);
 
+  /* Only what the tools share: the board and the hidden switch (a tool's own
+     view, step or rail means nothing to the next). The board is the one the
+     visitor ASKED for when this tool had to show another (`asked`, below), so
+     a board one tool lacks is not swapped for that tool's default two hops
+     later. */
+  const carried = () => {
+    const here = new URLSearchParams(location.search);
+    const q = new URLSearchParams();
+    const board = here.get("asked") || here.get("board");
+    if (board) q.set("board", board);
+    if (here.get("hidden")) q.set("hidden", here.get("hidden"));
+    const s = q.toString();
+    return s ? `?${s}` : "";
+  };
   const refresh = () => {
-    for (const a of links) a.href = bases.get(a) + location.search;
+    for (const a of links) a.href = bases.get(a) + carried();
   };
 
   for (const ev of ["pointerdown", "focus", "click"]) {
