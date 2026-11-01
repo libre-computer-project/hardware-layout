@@ -103,8 +103,8 @@ async function init() {
     index = await getJSON("data/boards.json");
   } catch (e) {
     notice("Could not load the board index. If you are opening this from a " +
-           "file:// path, serve the directory over HTTP instead — " +
-           "<code>python3 -m http.server</code>.", "error");
+           "file:// path, serve the directory over HTTP instead — ", "error",
+           "python3 -m http.server");
     return;
   }
   boardIndex = index.boards;
@@ -146,11 +146,19 @@ function getJSON(url) {
   });
 }
 
-function notice(html, cls) {
+/* Text only. A notice repeats what the visitor asked for (?board=, a fetch
+   error), so it is never parsed as markup: ?board=<img onerror=…> was script
+   on this origin while this set innerHTML. A command to show goes in `code`. */
+function notice(text, cls, code) {
   const p = document.createElement("p");
   p.className = "lc-notice" + (cls ? " " + cls : "");
   p.setAttribute("role", "status");
-  p.innerHTML = html;
+  p.textContent = text;
+  if (code) {
+    const c = document.createElement("code");
+    c.textContent = code;
+    p.append(c, ".");
+  }
   els.notices.appendChild(p);
 }
 
@@ -281,7 +289,7 @@ function renderMeta() {
     const other = boardIndex.find((b) => b.id === meta.shares_layout_with);
     if (other && (showHidden || !other.hidden)) {
       html += `<br><span class="status">same PCB as ` +
-        `<a href="?board=${other.id}${showHidden ? "&hidden=1" : ""}">${esc(other.model)}</a></span>`;
+        `<a href="?board=${encodeURIComponent(other.id)}${showHidden ? "&amp;hidden=1" : ""}">${esc(other.model)}</a></span>`;
     }
   }
   els.meta.innerHTML = html;
@@ -386,9 +394,9 @@ function buildCatToggles() {
     b.className = "lc-toggle";
     b.setAttribute("aria-pressed", String(!hiddenCats.has(cat)));
     b.innerHTML =
-      `<span class="lc-swatch" style="background:${info.color}"></span>` +
+      `<span class="lc-swatch" style="background:${HEX.test(info.color) ? info.color : "transparent"}"></span>` +
       `<span class="lc-name">${esc(CAT_NAMES[cat] || cat)}</span>` +
-      `<span class="lc-count">${info.count}</span>`;
+      `<span class="lc-count">${esc(String(info.count))}</span>`;
     b.onclick = () => {
       if (hiddenCats.has(cat)) hiddenCats.delete(cat);
       else hiddenCats.add(cat);
@@ -480,8 +488,11 @@ function showDetail() {
 function esc(s) {
   return String(s == null ? "" : s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+
+// a colour from the data goes into a style attribute only as #rgb / #rrggbb
+const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 /* ---- the view transform -------------------------------------------------- */
 

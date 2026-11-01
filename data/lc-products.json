@@ -11,10 +11,6 @@
    "page": "https://libre.computer/products/aml-a311d-cc/",
    "model": "https://cad.place/?list=https%3A%2F%2Flibre.computer%2Fapi%2Fproducts%2Fmodels.json&model=aml-a311d-cc"
   },
-  "aml-a311d-cm": {
-   "name": "Alta Compute Module",
-   "page": "https://libre.computer/products/aml-a311d-cm/"
-  },
   "aml-s805x-ac": {
    "name": "La Frite",
    "page": "https://libre.computer/products/aml-s805x-ac/",

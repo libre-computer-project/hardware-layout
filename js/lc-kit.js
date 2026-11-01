@@ -1,6 +1,7 @@
-/* lc-kit 1 sha256:b5771b8617d9e2f489555132fa7c7137b2fd48c0acfe4a33c095af72b741587d */
+/* lc-kit 1 sha256:d112b7124e961268fdcd13af99c5ad02c89730bf85c870a765030ceeb3fd21d1 */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
- * pinout and the board layout viewer.
+ * pinout, the board layout viewer, the power tree and the sites that took the
+ * same look.
  *
  * Three theme states, matching libre.computer: light, dark, and auto, which
  * follows the OS and is the default. `themePref()` is what the visitor chose;
