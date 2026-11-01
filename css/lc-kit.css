@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:6b29c5f2e1e98e082fa952a16d95acf09bba82d6646979dc36558cfa3a5d6467 */
+/* lc-kit 1 sha256:bca32f996d0d052e3e7bb8cfdfac832145bc2508a6ca326e44dcfb81a5d9d746 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -570,12 +570,6 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 }
 .lc-table tbody th { font-weight: 600; }
 .lc-table-scroll { overflow-x: auto; }
-/* A table in a narrow side panel (the pinout's pin detail): the same
-   headers, tighter cells, values in the monospace stack. */
-.lc-table.lc-compact { font-size: 13px; }
-.lc-table.lc-compact th,
-.lc-table.lc-compact td { padding: 3px 10px 3px 0; }
-.lc-table.lc-compact td { font-family: var(--mono); font-size: 12.5px; }
 
 /* The small dim uppercase label: a panel heading, a column title, a
    section kicker -- the same voice as .lc-panel h3 and a table's header. */
@@ -659,7 +653,6 @@ input[type="search"]::placeholder { color: var(--text-dim); }
    the whole row takes the label below body text in both themes. */
 .lc-toggle[aria-pressed="false"] { color: var(--text-dim); }
 .lc-toggle[aria-pressed="false"] .lc-swatch { opacity: .45; }
-.lc-toggle .lc-swatch { vertical-align: 0; }
 .lc-toggle .lc-name {
   flex: 1;
   overflow: hidden;
