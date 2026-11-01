@@ -33,6 +33,7 @@ import html as html_mod
 import json
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -98,13 +99,12 @@ CANONICAL_HEAD = re.compile(
 # Documents a browser runs script in, by how the servers (GitHub Pages,
 # nginx) type them:
 #   - HTML pages are checked against the fixed head shape above;
-#   - XHTML is parsed as XML, where a <meta> policy does nothing: refused;
-#   - any other XML (SVG, sitemap, XSL) opened directly runs with no policy,
-#     so it may carry nothing that could run. The test is deliberately
-#     coarse (it over-refuses): no script element in any namespace or prefix,
-#     no event handler, no "javascript", no character reference (which can
-#     spell either), no DTD or entity, no prefixed element, no stylesheet
-#     processing instruction, no foreignObject.
+#   - SVG and XML opened directly run with no policy, so each must parse as
+#     a plain drawing or a sitemap (check_xml: listed elements and
+#     attributes only);
+#   - the site root carries .nojekyll: without it GitHub Pages runs Jekyll,
+#     which renders every .md into a page with no policy and passes raw HTML
+#     through.
 #
 # Every file in the tree must have a suffix on the list below -- what these
 # sites publish, each checked for how GitHub Pages and nginx serve it -- so a
@@ -118,9 +118,44 @@ TEXT_SUFFIXES = PAGE_SUFFIXES | XML_SUFFIXES | {
     ".css", ".js", ".mjs", ".json", ".map", ".md", ".txt", ".py", ".yml", ".yaml"}
 BINARY_SUFFIXES = {".ico", ".webp", ".png", ".jpg", ".jpeg", ".gif", ".woff", ".woff2", ".pyc"}
 NAMES = {"CNAME", ".gitignore", ".nojekyll", ".public-surface-allow"}  # (no suffix)
-XML_ACTIVE = re.compile(
-    r"script|\son[a-z]+\s*=|javascript|&#|<!DOCTYPE|<!ENTITY|<[A-Za-z_][\w.-]*:|<\?xml-stylesheet|foreignObject",
-    re.I)
+# XML documents (round 14: a deny-list missed an XHTML <iframe srcdoc>):
+# parsed, and every element and attribute must be on these lists -- the
+# drawing subset of SVG our diagrams use, and a sitemap. Nothing else.
+SVG_NS = "{http://www.w3.org/2000/svg}"
+SITEMAP_NS = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+XML_ELEMENTS = {SVG_NS + t for t in (
+    "svg", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
+    "text", "tspan", "title", "desc", "defs", "marker", "linearGradient", "radialGradient", "stop")} | {
+    SITEMAP_NS + t for t in ("urlset", "url", "loc", "lastmod", "changefreq", "priority")}
+XML_ATTRS = {
+    "aria-label", "role", "id", "class", "viewBox", "width", "height", "x", "y", "x1", "y1", "x2", "y2",
+    "cx", "cy", "r", "rx", "ry", "dx", "dy", "d", "points", "transform", "fill", "fill-opacity",
+    "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin", "stroke-opacity",
+    "opacity", "font-family", "font-size", "font-weight", "text-anchor", "dominant-baseline",
+    "letter-spacing", "marker-end", "marker-start", "markerHeight", "markerWidth", "orient",
+    "refX", "refY", "offset", "stop-color", "stop-opacity"}
+# a value may name a local reference only (url(#id)), never a scheme
+XML_VALUE_BAD = re.compile(r"url\((?!#[\w-]+\))|[a-z][a-z0-9+.-]*:(?!\s)|&", re.I)
+
+
+def check_xml(text):
+    """The XML document is a plain drawing or a sitemap, or the reason it is not."""
+    m = re.search(r"<!DOCTYPE|<!ENTITY|<\?xml-stylesheet|<!\[CDATA\[", text, re.I)
+    if m:
+        return f"{m.group(0)!r} (no DTD, entity, stylesheet or CDATA in an XML document)"
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError as e:
+        return f"not well-formed XML ({e})"
+    for el in root.iter():
+        if el.tag not in XML_ELEMENTS:
+            return f"element {el.tag!r} is not on the list a published SVG or sitemap may use"
+        for name, value in el.attrib.items():
+            if name not in XML_ATTRS:
+                return f"attribute {name!r} on {el.tag!r} is not on the list"
+            if XML_VALUE_BAD.search(value):
+                return f"attribute {name}={value!r} names a URL or a scheme"
+    return None
 # every inline script a browser could run: any attributes, any case, no src=
 INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
 SCRIPT_DIRECTIVES = ("script-src", "script-src-elem", "script-src-attr")
@@ -202,6 +237,9 @@ def main():
                     f"on every load.")
 
     check_products(problems)
+    if not (ROOT / ".nojekyll").is_file():
+        problems.append(".nojekyll is missing: GitHub Pages would run Jekyll, which renders "
+                        "each .md into a page with no Content-Security-Policy")
     # every document in the tree a browser could run script in, kit or not
     # (a generated site keeps its pages in directories, a redirect stub is a
     # page too, and tools/ is served as well); only git's own dir is skipped
@@ -232,10 +270,10 @@ def main():
         if suffix in PAGE_SUFFIXES:
             problems += [f"{rel}: {p}" for p in check_csp(text)]
         elif suffix in XML_SUFFIXES:
-            m = XML_ACTIVE.search(text)
-            if m:
-                problems.append(f"{rel}: {m.group(0)!r} in an XML document (opened directly it "
-                                f"runs with no policy, so it may carry nothing that could run)")
+            why = check_xml(text)
+            if why:
+                problems.append(f"{rel}: {why} -- opened directly an XML document runs with no "
+                                f"policy, so it may only be a plain drawing or a sitemap")
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)
