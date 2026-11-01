@@ -134,8 +134,10 @@ XML_ATTRS = {
     "opacity", "font-family", "font-size", "font-weight", "text-anchor", "dominant-baseline",
     "letter-spacing", "marker-end", "marker-start", "markerHeight", "markerWidth", "orient",
     "refX", "refY", "offset", "stop-color", "stop-opacity"}
-# a value may name a local reference only (url(#id)), never a scheme
-XML_VALUE_BAD = re.compile(r"url\((?!#[\w-]+\))|[a-z][a-z0-9+.-]*:(?!\s)|&", re.I)
+# a value may name a local reference only (url(#id)), never a scheme; and no
+# backslash, since a browser decodes CSS escapes in presentation attributes
+# (round 15: fill="u\72l(http\3a //host/x.svg#p)" fetched from any host)
+XML_VALUE_BAD = re.compile(r"url\((?!#[\w-]+\))|[a-z][a-z0-9+.-]*:(?!\s)|&|\\", re.I)
 
 
 def check_xml(text):
