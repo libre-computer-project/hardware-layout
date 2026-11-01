@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:f150af3e896c1fa02fcd8815abde28ce643fed45124697238266f8392519459d */
+/* lc-kit 1 sha256:045c7a415cf7bf3be3f3cb42cc380451d18d56116e80cdf7114d9fceadfd730e */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -283,7 +283,7 @@ html.dark {
   white-space: nowrap;
   color: var(--text-dim);
 }
-.lc-site[aria-current="page"] {
+.lc-site[aria-current] {
   color: var(--text);
   font-weight: 600;
 }
