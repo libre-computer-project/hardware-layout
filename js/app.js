@@ -274,7 +274,7 @@ function renderMeta() {
   const bits = [
     `<b>${esc(board.model)}</b> ${esc(board.rev || "")}`,
     `${esc(board.name)} · ${esc(board.soc)}`,
-    `${o.w} &times; ${o.h} mm · ${board.copper_index.length} copper layers`,
+    `${esc(o.w)} &times; ${esc(o.h)} mm · ${board.copper_index.length} copper layers`,
     `${parts} placed parts · ${Object.keys(board.nets).length} nets`,
   ];
   let html = bits.join("<br>");
@@ -364,7 +364,7 @@ function buildCopperToggles() {
     b.innerHTML =
       `<span class="lc-swatch" style="background:${cssVar(COPPER_VARS[i % 8])}"></span>` +
       `<span class="lc-name">${esc(l.label || l.name)}</span>` +
-      `<span class="lc-count">${l.traces}T ${l.pads}P</span>`;
+      `<span class="lc-count">${esc(l.traces)}T ${esc(l.pads)}P</span>`;
     b.onclick = () => toggleCopper(i);
     els.copper.appendChild(b);
   });
