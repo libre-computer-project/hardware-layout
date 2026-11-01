@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:10479893ced77a01062c927f96ffaabf5978a9ab03d4ca9ee9853acf6cc7b514 */
+/* lc-kit 1 sha256:01a3593f5a493ef218f9acd4c7ba61a1d0033705a1d5e2420c07b28e9c751ab0 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -438,7 +438,8 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 /* ---- skip link, visually hidden ----------------------------------------- */
 
 /* The first Tab stop on every page: past the title bar to the page's own
-   content (<a class="lc-skip" href="#main">, the target a <main id="main">). */
+   content (<a class="lc-skip" href="#main">, the target the page's <main>,
+   id="main" unless it already has an id). */
 .lc-skip {
   position: absolute;
   left: -999px;

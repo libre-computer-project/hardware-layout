@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:d77de1470f7f4ef74b02ce27f88c55417339380233db519dbca4afeb65ac42ea */
+/* lc-kit 1 sha256:42395219eaf3083c16adec811a0de25b26382d514ba9a0776c8b6f24f057d9b2 */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -88,9 +88,25 @@ export function token(name) {
  *
  * Returns the theme button so a caller can place it itself if it wants to.
  */
+/* On a phone the switcher and the Software bar are each one sideways row
+   with the scrollbar hidden, so the visitor's own entry can open scrolled
+   out of sight (the Software bar's page links sit at its far end). Bring each
+   row's current entry in -- the row only, never the page. */
+function showCurrentEntries() {
+  for (const row of document.querySelectorAll(".lc-sites, .lc-subnav")) {
+    if (row.scrollWidth <= row.clientWidth) continue;
+    const cur = row.querySelector('[aria-current="page"]') || row.querySelector("[aria-current]");
+    if (!cur) continue;
+    const r = cur.getBoundingClientRect(), box = row.getBoundingClientRect();
+    if (r.right > box.right) row.scrollLeft += r.right - box.right + 16;
+    else if (r.left < box.left) row.scrollLeft -= box.left - r.left + 16;
+  }
+}
+
 export function mountShell({ themeButton = true } = {}) {
   applyTheme();
   mountSiteSwitch();
+  showCurrentEntries();
 
   // Follow the OS while the choice is auto, including a mid-visit change.
   window

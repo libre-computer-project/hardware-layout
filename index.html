@@ -19,6 +19,7 @@
 <script>try{var p=localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
 </head>
 <body>
+<a class="lc-skip" href="#main">Skip to content</a>
 
 <header class="lc-topbar">
   <div class="lc-brand">
@@ -40,8 +41,8 @@
 
 <div class="lc-notices" id="notices"></div>
 
-<main class="lc-main">
-  <h1 class="vh">Board layout</h1>
+<main class="lc-main" id="main">
+  <h1 class="lc-vh">Board layout</h1>
   <aside class="lc-panel" id="sidebar">
     <h3>Board</h3>
     <div id="board-meta"></div>
@@ -59,7 +60,7 @@
     <h3>Parts</h3>
     <div id="comp-list" role="listbox" tabindex="0" aria-label="Placed parts"></div>
     <div id="detail"></div>
-    <p id="announce" class="vh" role="status"></p>
+    <p id="announce" class="lc-vh" role="status"></p>
   </aside>
 
   <!-- Focusable so the keys pan and zoom it; the parts themselves are picked
