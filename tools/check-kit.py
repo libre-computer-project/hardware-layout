@@ -105,9 +105,19 @@ CANONICAL_HEAD = re.compile(
 #     no event handler, no "javascript", no character reference (which can
 #     spell either), no DTD or entity, no prefixed element, no stylesheet
 #     processing instruction, no foreignObject.
+#
+# Every file in the tree must have a suffix on the list below -- what these
+# sites publish, each checked for how GitHub Pages and nginx serve it -- so a
+# type a server would render as a document (.xhtml, .svgz, .xsd, ...) is
+# refused for being unknown, not missed for being unlisted. Text files must
+# be strict UTF-8 with no byte-order mark: a UTF-16 file decoded here as
+# UTF-8 hides every word a browser, following its BOM, would read.
 PAGE_SUFFIXES = {".html", ".htm", ".shtml"}
-XHTML_SUFFIXES = {".xhtml", ".xht"}
-XML_SUFFIXES = {".svg", ".xml", ".xsl", ".xslt"}
+XML_SUFFIXES = {".svg", ".xml"}
+TEXT_SUFFIXES = PAGE_SUFFIXES | XML_SUFFIXES | {
+    ".css", ".js", ".mjs", ".json", ".map", ".md", ".txt", ".py", ".yml", ".yaml"}
+BINARY_SUFFIXES = {".ico", ".webp", ".png", ".jpg", ".jpeg", ".gif", ".woff", ".woff2", ".pyc"}
+NAMES = {"CNAME", ".gitignore", ".nojekyll", ".public-surface-allow"}  # (no suffix)
 XML_ACTIVE = re.compile(
     r"script|\son[a-z]+\s*=|javascript|&#|<!DOCTYPE|<!ENTITY|<[A-Za-z_][\w.-]*:|<\?xml-stylesheet|foreignObject",
     re.I)
@@ -199,13 +209,30 @@ def main():
         rel = doc.relative_to(ROOT)
         if rel.parts[0] == ".git":
             continue
+        if doc.is_symlink():
+            problems.append(f"{rel}: a symlink (a server may follow it to anything)")
+            continue
         suffix = doc.suffix.lower()
+        if doc.name in NAMES or suffix in BINARY_SUFFIXES:
+            continue
+        if suffix not in TEXT_SUFFIXES:
+            problems.append(f"{rel}: {suffix or 'no suffix'} is not a file type these sites "
+                            f"publish -- add it to check-kit.py only after checking how GitHub "
+                            f"Pages and nginx serve it")
+            continue
+        raw = doc.read_bytes()
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            problems.append(f"{rel}: not UTF-8 (a browser may decode it otherwise than this check)")
+            continue
+        if text.startswith("﻿") or "\x00" in text:
+            problems.append(f"{rel}: a byte-order mark or NUL (a browser may decode it otherwise)")
+            continue
         if suffix in PAGE_SUFFIXES:
-            problems += [f"{rel}: {p}" for p in check_csp(doc.read_text(errors="replace"))]
-        elif suffix in XHTML_SUFFIXES:
-            problems.append(f"{rel}: XHTML is parsed as XML, where a <meta> policy does nothing")
+            problems += [f"{rel}: {p}" for p in check_csp(text)]
         elif suffix in XML_SUFFIXES:
-            m = XML_ACTIVE.search(doc.read_text(errors="replace"))
+            m = XML_ACTIVE.search(text)
             if m:
                 problems.append(f"{rel}: {m.group(0)!r} in an XML document (opened directly it "
                                 f"runs with no policy, so it may carry nothing that could run)")
