@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:e7d4f54bc1c13805bbd1eb24d78d513034c309f2ff6ff18fed2d6edfde68264d */
+/* lc-kit 1 sha256:65abe02e07c8aa20a33ed8ca4db3b0d5e1b69b29a3b516b3caf316431b77ceed */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -32,7 +32,23 @@ const UI = {
    and the cost of disagreeing is a visitor being asked twice. */
 const KEY = "theme";
 
+/* EMBED MODE (?embed=1): the tool inside another page's frame -- a
+   libre.computer product page opens Layout, Pinout, Power, U-Boot, Memory map
+   and Linux in a panel under the board. The page that frames it already says
+   which board and which site, so the chrome that says so goes (the brand, the
+   site switcher, the Software bar, the board links, the footer, and the board
+   or SoC-family picker: the frame is for one board); the tool's own controls
+   stay. ?theme=light|dark paints the frame like the page around it, without
+   storing a preference here. An "Open ⤢" link opens the full tool in a new
+   tab, and every link to another site opens in a new tab rather than inside
+   the frame (most refuse to be framed). */
+const Q = new URLSearchParams(location.search);
+export const EMBED = Q.get("embed") === "1";
+const FORCED_THEME = EMBED && ["light", "dark"].includes(Q.get("theme")) ? Q.get("theme") : null;
+if (EMBED) document.documentElement.classList.add("lc-embed");
+
 export function themePref() {
+  if (FORCED_THEME) return FORCED_THEME;
   let p = "auto";
   try {
     p = localStorage.getItem(KEY) || "auto";
@@ -103,6 +119,38 @@ function showCurrentEntries() {
   }
 }
 
+/** The full tool's address for the embed's "Open ⤢": this page as it is now
+    (a tool keeps its state in the address with replaceState), less embed and
+    theme. */
+function fullAddress() {
+  const url = new URL(location.href);
+  url.searchParams.delete("embed");
+  url.searchParams.delete("theme");
+  return url.href;
+}
+
+function mountEmbed() {
+  const open = document.createElement("a");
+  open.className = "lc-embed-open";
+  open.target = "_blank";
+  open.rel = "noopener";
+  open.textContent = "Open ⤢";
+  open.title = "Open the full tool in a new tab";
+  const refresh = () => { open.href = fullAddress(); };
+  for (const ev of ["pointerdown", "focus", "click"]) open.addEventListener(ev, refresh);
+  refresh();
+  const bar = document.querySelector(".lc-topbar");
+  (bar?.querySelector(".lc-controls") || bar || document.body).appendChild(open);
+  // A link to another site leaves the frame for a new tab, whenever it was
+  // drawn: set at the click, so links a tool renders later are covered too.
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.("a[href]");
+    if (!a || a.origin === location.origin) return;
+    a.target = "_blank";
+    a.rel = "noopener";
+  }, true);
+}
+
 export function mountShell({ themeButton = true } = {}) {
   applyTheme();
   mountSiteSwitch();
@@ -115,6 +163,11 @@ export function mountShell({ themeButton = true } = {}) {
       if (themePref() === "auto") applyTheme("auto");
     });
 
+  // In a frame the theme follows the page around it (?theme=), so no button.
+  if (EMBED) {
+    mountEmbed();
+    return null;
+  }
   if (!themeButton) return null;
 
   let btn = document.getElementById("lc-theme");

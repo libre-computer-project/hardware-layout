@@ -16,6 +16,10 @@
    "page": "https://libre.computer/products/aml-s805x-ac/",
    "model": "https://cad.place/?list=https%3A%2F%2Flibre.computer%2Fapi%2Fproducts%2Fmodels.json&model=aml-s805x-ac"
   },
+  "aml-s805x-ac-v2": {
+   "name": "Das Frite",
+   "page": "https://libre.computer/products/aml-s805x-ac-v2/"
+  },
   "aml-s905d3-cc": {
    "name": "Solitude",
    "page": "https://libre.computer/products/aml-s905d3-cc/",

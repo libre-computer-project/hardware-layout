@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:01a3593f5a493ef218f9acd4c7ba61a1d0033705a1d5e2420c07b28e9c751ab0 */
+/* lc-kit 1 sha256:e657690d97cee420c924318a584bea1f46706115be2c13dc1895a3393b505f55 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -463,6 +463,41 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ---- embed mode (?embed=1, lc-kit.js EMBED) ------------------------------ */
+
+/* Inside another page's frame: the chrome that names the site and the board
+   goes (the framing page names both), the tool's own controls stay, and
+   "Open ⤢" opens the full tool. The board and SoC-family pickers go too: the
+   frame is for the one board its page is about. */
+html.lc-embed .lc-skip,
+html.lc-embed .lc-brand,
+html.lc-embed .lc-sites,
+html.lc-embed .lc-subnav,
+html.lc-embed .lc-board-links,
+html.lc-embed .lc-footer,
+html.lc-embed .lc-theme-btn,
+html.lc-embed #board-select,
+html.lc-embed .board-select,
+html.lc-embed #family-select,
+html.lc-embed .family-select,
+html.lc-embed label[for="board-select"],
+html.lc-embed label[for="family-select"] {
+  display: none !important;
+}
+html.lc-embed .lc-topbar { position: static; padding: 6px 12px; }
+.lc-embed-open {
+  display: inline-flex;
+  align-items: center;
+  padding: .3rem .7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.lc-embed-open:hover { border-color: var(--text-dim); text-decoration: none; }
+.lc-embed-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---- theme button ------------------------------------------------------ */
 
