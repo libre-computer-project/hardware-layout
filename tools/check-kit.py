@@ -17,17 +17,58 @@ has to run before first paint and a module is deferred -- so it is inline in
 every page, and inline copies are exactly the thing that drifts. Without it a
 dark visitor gets a white flash on every load.
 
+And data/lc-products.json, where a site has it: the board links beside the
+board picker may only name boards this site lists, and link only to
+https://libre.computer and https://cad.place.
+
     tools/check-kit.py          exit 0 clean, 1 with findings
 """
 
 import hashlib
+import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 FILES = ["css/lc-kit.css", "js/lc-kit.js"]
 BANNER = re.compile(r"^/\* lc-kit (\S+) sha256:([0-9a-f]{64}) \*/\n")
+
+
+# data/lc-products.json (written by sync.py) puts links on the page, beside
+# the board picker. A link there can only go to the board's page on
+# libre.computer or its model in cad.place, over https, and only for a board
+# this site lists.
+PRODUCTS = "data/lc-products.json"
+LINK_HOSTS = {"page": "libre.computer", "model": "cad.place"}
+
+
+def check_products(problems):
+    path = ROOT / PRODUCTS
+    if not path.exists():
+        return
+    try:
+        boards = json.loads(path.read_text())["boards"]
+        listed = {b["id"] for b in json.loads((ROOT / "data/boards.json").read_text())["boards"]}
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        problems.append(f"{PRODUCTS}: unreadable ({e})")
+        return
+    if not isinstance(boards, dict):
+        problems.append(f"{PRODUCTS}: boards is not an object")
+        return
+    for bid, b in boards.items():
+        if bid not in listed:
+            problems.append(f"{PRODUCTS}: {bid!r} is not a board this site lists")
+        if not isinstance(b, dict) or not isinstance(b.get("name"), str) or "page" not in b:
+            problems.append(f"{PRODUCTS}[{bid}]: needs a name and a page")
+            continue
+        for key, host in LINK_HOSTS.items():
+            if key not in b:
+                continue
+            u = urlsplit(b[key]) if isinstance(b[key], str) else None
+            if not u or u.scheme != "https" or u.hostname != host:
+                problems.append(f"{PRODUCTS}[{bid}].{key}: {b[key]!r} is not https://{host}/...")
 
 
 def main():
@@ -68,6 +109,8 @@ def main():
                     f"{page.name} does not carry the current pre-paint theme "
                     f"snippet -- without it a dark visitor sees a white flash "
                     f"on every load.")
+
+    check_products(problems)
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)

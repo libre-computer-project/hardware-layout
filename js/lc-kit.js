@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:14cf74d4e82ce2b956df68764ff11ec9cfb5b9f2c94255fd6cd1422e10c1cf6a */
+/* lc-kit 1 sha256:b5771b8617d9e2f489555132fa7c7137b2fd48c0acfe4a33c095af72b741587d */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout and the board layout viewer.
  *
@@ -172,6 +172,69 @@ export function mountSiteSwitch(root = document) {
   }
   refresh();
   return links;
+}
+
+/**
+ * The board's own pages, beside the board picker: its product page on
+ * libre.computer and its 3D model in cad.place, so a visitor who arrived at a
+ * tool from a search can find the board itself.
+ *
+ * The links are data/lc-products.json, written into each tool by
+ * tools/lc-ui-kit/sync.py from libre.computer's catalogue -- { "boards": {
+ * "<this tool's board id>": { "name", "page", "model"? } } } for released
+ * boards only -- rather than fetched from libre.computer, which sends no CORS
+ * to these sites and would couple each tool to that site being up. A board
+ * the file does not name (a hidden one, one with no product page) shows no
+ * links, and a site without the file shows none for any board.
+ *
+ * Call it with the board id whenever the board changes. Only http(s) links
+ * are drawn, from text alone, so the file can never inject markup.
+ */
+let products = null; // the file's boards, once fetched (a promise)
+
+export async function setBoardLinks(id) {
+  if (!products) {
+    products = fetch("data/lc-products.json")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((d) => (d && typeof d.boards === "object" && d.boards) || {})
+      .catch(() => ({}));
+  }
+  const boards = await products;
+  let nav = document.getElementById("lc-board-links");
+  if (!nav) {
+    const slot = document.querySelector(".lc-controls");
+    if (!slot) return null;
+    nav = document.createElement("nav");
+    nav.id = "lc-board-links";
+    nav.className = "lc-board-links";
+    nav.setAttribute("aria-label", "This board's pages");
+    // after the board picker, before the search box
+    const sel = slot.querySelector("select");
+    if (sel) sel.after(nav);
+    else slot.prepend(nav);
+  }
+  nav.textContent = "";
+  const b = Object.prototype.hasOwnProperty.call(boards, id) ? boards[id] : null;
+  const safe = (u) => {
+    try {
+      return /^https?:$/.test(new URL(u).protocol) ? u : null;
+    } catch (_) {
+      return null;
+    }
+  };
+  const link = (href, text, title) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = text;
+    a.title = title;
+    a.rel = "noopener";
+    nav.appendChild(a);
+  };
+  const name = b && typeof b.name === "string" ? b.name : "this board";
+  if (b && safe(b.page)) link(b.page, "Product page", `${name} on libre.computer`);
+  if (b && safe(b.model)) link(b.model, "3D model", `${name}'s 3D model in cad.place`);
+  nav.hidden = !nav.childElementCount;
+  return nav;
 }
 
 /**

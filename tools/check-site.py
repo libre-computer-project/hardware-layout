@@ -86,7 +86,9 @@ def main():
         bad.append("boards.json: duplicate board id")
 
     # 1 + 2 -- the index and the files agree, and the files are readable.
-    expected = {"boards.json"}
+    # (lc-products.json: the board links beside the picker, written by the
+    # kit's sync and checked by tools/check-kit.py)
+    expected = {"boards.json", "lc-products.json"}
     for row in index:
         missing = INDEX_KEYS - set(row)
         if missing:

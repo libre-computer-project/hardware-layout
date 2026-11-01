@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:3826ac490290828bea026f076ec9db5f6634e213db90dc56bda41ad94e5b64cb */
+/* lc-kit 1 sha256:4594bef3619882878e8ebfe610fedbbf1368ac7e66ae876d950d57fe54547892 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -285,6 +285,27 @@ a.lc-site:focus-visible {
   margin-right: 10px;
   vertical-align: -1px;
   background: var(--border);
+}
+
+/* The board's own pages, beside the board picker (setBoardLinks). Small and
+   dim like the site links, so the picker and the search stay the controls. */
+.lc-board-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 13px;
+}
+.lc-board-links[hidden] { display: none; }
+.lc-board-links a { color: var(--text-dim); white-space: nowrap; }
+.lc-board-links a:hover { color: var(--accent); text-decoration: none; }
+.lc-board-links a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+@media (max-width: 819.98px) {
+  .lc-board-links a { display: inline-block; padding: 10px 0; line-height: 20px; }
 }
 
 /* A pill for a state the visitor should not have to infer, e.g. that the board

@@ -55,6 +55,7 @@ js/lc-kit.js          VENDORED shell: theme cycle, mountShell(), token()
 css/style.css         this tool only: copper palette, board, canvas stage
 js/app.js             the viewer: canvas render, filters, net highlight
 data/boards.json      the board index the picker is built from
+data/lc-products.json VENDORED: each board's product page and 3D model, beside the picker
 data/<id>.json        outline, placement, categories, netlist   -- always fetched
 data/<id>.copper.json the eight copper layers                   -- fetched on demand
 tools/gen-layout-data.py   ODB++ export -> the two data files

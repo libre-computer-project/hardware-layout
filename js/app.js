@@ -9,7 +9,7 @@
 
 "use strict";
 
-import { mountShell, token } from "./lc-kit.js";
+import { mountShell, setBoardLinks, token } from "./lc-kit.js";
 
 /* Category display names, and the order the sidebar lists them in. The order
    is by how much of the board the class explains, not alphabetical: someone
@@ -225,6 +225,7 @@ async function loadBoard(id) {
   fitView();
   draw();
   spin(false);
+  setBoardLinks(id);
 
   const url = new URL(location.href);
   url.searchParams.set("board", id);
