@@ -54,6 +54,7 @@ const els = {
   cats: $("cat-toggles"),
   list: $("comp-list"),
   detail: $("detail"),
+  announce: $("announce"),
   stage: $("stage"),
   canvas: $("canvas"),
   tooltip: $("tooltip"),
@@ -86,6 +87,7 @@ let side = "top";
 let hiddenCats = new Set();
 let visibleCopper = new Set();
 let selected = null;      /* refdes */
+let active = 0;           /* the Parts list's keyboard row, an index into shown */
 let hovered = null;       /* component object */
 let term = "";
 let shown = [];           /* components passing the category + search filter */
@@ -290,17 +292,30 @@ function renderMeta() {
   els.meta.innerHTML = html;
 }
 
+/* The sidebar's button groups are rebuilt on every press (their counts and
+   swatches change with the side, the theme and the loaded copper). A rebuild
+   would drop focus to the page, so the button that had it -- by its data-key --
+   is focused again in the new set. */
+function rebuild(host, fill) {
+  const had = host.contains(document.activeElement) ? document.activeElement.dataset.key : null;
+  host.textContent = "";
+  fill();
+  if (had != null) host.querySelector(`[data-key="${CSS.escape(had)}"]`)?.focus();
+}
+
 function buildSideSeg() {
-  els.sideSeg.textContent = "";
-  for (const [key, label] of [["top", "Top"], ["bot", "Bottom"]]) {
-    if (!board.components[key]) continue;
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = label;
-    b.setAttribute("aria-pressed", String(side === key));
-    b.onclick = () => setSide(key);
-    els.sideSeg.appendChild(b);
-  }
+  rebuild(els.sideSeg, () => {
+    for (const [key, label] of [["top", "Top"], ["bot", "Bottom"]]) {
+      if (!board.components[key]) continue;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.key = key;
+      b.textContent = label;
+      b.setAttribute("aria-pressed", String(side === key));
+      b.onclick = () => setSide(key);
+      els.sideSeg.appendChild(b);
+    }
+  });
 }
 
 function setSide(key) {
@@ -330,7 +345,8 @@ function buildKeyHint() {
      do nothing -- measured: 8 toggles L8, 9 and 0 change nothing. The layers
      beyond the eighth are reachable from the sidebar toggles. */
   const n = Math.min((board.copper_index || []).length, 8);
-  const bits = ["<kbd>F</kbd> fit", "<kbd>T</kbd>/<kbd>B</kbd> side"];
+  const bits = ["<kbd>F</kbd> fit", "arrows pan", "<kbd>+</kbd>/<kbd>−</kbd> zoom",
+    "<kbd>T</kbd>/<kbd>B</kbd> side"];
   if (n === 1) bits.push("<kbd>1</kbd> copper");
   else if (n > 1) bits.push(`<kbd>1</kbd>–<kbd>${n}</kbd> copper`);
   if (Object.keys(board.nets || {}).length) {
@@ -342,8 +358,23 @@ function buildKeyHint() {
 
 function buildCopperToggles() {
   buildKeyHint();
-  els.copper.textContent = "";
   const layers = board.copper_index || [];
+  rebuild(els.copper, () => {
+    if (!layers.length) return;
+    layers.forEach((l, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "lc-toggle";
+      b.dataset.key = String(i);
+      b.setAttribute("aria-pressed", String(visibleCopper.has(i)));
+      b.innerHTML =
+        `<span class="lc-swatch" style="background:${cssVar(COPPER_VARS[i % 8])}"></span>` +
+        `<span class="lc-name">${esc(l.label || l.name)}</span>` +
+        `<span class="lc-count">${esc(l.traces)}T ${esc(l.pads)}P</span>`;
+      b.onclick = () => toggleCopper(i);
+      els.copper.appendChild(b);
+    });
+  });
   if (!layers.length) {
     els.copperNote.textContent = "This export carries no copper layers.";
     return;
@@ -351,18 +382,6 @@ function buildCopperToggles() {
   els.copperNote.textContent = board.copper_file && !copper
     ? "Routing loads when you switch a layer on."
     : "";
-  layers.forEach((l, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "lc-toggle";
-    b.setAttribute("aria-pressed", String(visibleCopper.has(i)));
-    b.innerHTML =
-      `<span class="lc-swatch" style="background:${cssVar(COPPER_VARS[i % 8])}"></span>` +
-      `<span class="lc-name">${esc(l.label || l.name)}</span>` +
-      `<span class="lc-count">${esc(l.traces)}T ${esc(l.pads)}P</span>`;
-    b.onclick = () => toggleCopper(i);
-    els.copper.appendChild(b);
-  });
 }
 
 async function toggleCopper(i) {
@@ -378,29 +397,31 @@ async function toggleCopper(i) {
 }
 
 function buildCatToggles() {
-  els.cats.textContent = "";
   const cats = board.categories[side] || {};
   const keys = Object.keys(cats).sort(
     (a, b) => (CAT_ORDER.indexOf(a) + 99) % 100 - (CAT_ORDER.indexOf(b) + 99) % 100);
-  for (const cat of keys) {
-    const info = cats[cat];
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "lc-toggle";
-    b.setAttribute("aria-pressed", String(!hiddenCats.has(cat)));
-    b.innerHTML =
-      `<span class="lc-swatch" style="background:${HEX.test(info.color) ? info.color : "transparent"}"></span>` +
-      `<span class="lc-name">${esc(CAT_NAMES[cat] || cat)}</span>` +
-      `<span class="lc-count">${esc(String(info.count))}</span>`;
-    b.onclick = () => {
-      if (hiddenCats.has(cat)) hiddenCats.delete(cat);
-      else hiddenCats.add(cat);
-      buildCatToggles();
-      applyFilter();
-      draw();
-    };
-    els.cats.appendChild(b);
-  }
+  rebuild(els.cats, () => {
+    for (const cat of keys) {
+      const info = cats[cat];
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "lc-toggle";
+      b.dataset.key = cat;
+      b.setAttribute("aria-pressed", String(!hiddenCats.has(cat)));
+      b.innerHTML =
+        `<span class="lc-swatch" style="background:${HEX.test(info.color) ? info.color : "transparent"}"></span>` +
+        `<span class="lc-name">${esc(CAT_NAMES[cat] || cat)}</span>` +
+        `<span class="lc-count">${esc(String(info.count))}</span>`;
+      b.onclick = () => {
+        if (hiddenCats.has(cat)) hiddenCats.delete(cat);
+        else hiddenCats.add(cat);
+        buildCatToggles();
+        applyFilter();
+        draw();
+      };
+      els.cats.appendChild(b);
+    }
+  });
 }
 
 /* ---- filtering + the component list -------------------------------------- */
@@ -412,6 +433,8 @@ function applyFilter() {
   shown = comps().filter((c) =>
     !hiddenCats.has(c.c) &&
     (t === "" || c.r.toLowerCase().includes(t) || (c.f || "").toLowerCase().includes(t)));
+  // a new list: the keyboard row is the selected part if it is still in it
+  active = Math.max(0, shown.findIndex((c) => c.r === selected));
   buildList();
 }
 
@@ -441,23 +464,58 @@ function paintRows() {
   const out = [];
   for (let i = first; i < last; i++) {
     const c = shown[i];
+    /* virtualised, so each row says where it sits in the whole list, and
+       the keyboard row (aria-activedescendant) is the one with .active */
     out.push(
-      `<div class="comp-item" role="option" data-r="${esc(c.r)}" ` +
+      `<div class="comp-item${i === active ? " active" : ""}" role="option" id="part-${i}" ` +
+      `data-i="${i}" aria-setsize="${shown.length}" aria-posinset="${i + 1}" ` +
       `aria-selected="${c.r === selected}" style="top:${i * ROW_H}px">` +
       `${esc(c.r)}<span class="fp">${esc(c.f || "")}</span></div>`);
   }
   inner.innerHTML = out.join("");
   for (const el of inner.children) {
-    el.onclick = () => select(el.dataset.r, true);
+    el.onclick = () => {
+      active = Number(el.dataset.i);
+      select(shown[active].r, true);
+    };
+  }
+  if (shown.length) els.list.setAttribute("aria-activedescendant", `part-${active}`);
+  else els.list.removeAttribute("aria-activedescendant");
+}
+
+/* The Parts list from the keyboard: the arrows, Page Up/Down, Home and End
+   move its row, Enter or Space selects that part (and again deselects it). */
+function onListKey(e) {
+  if (e.altKey || e.ctrlKey || e.metaKey || !shown.length) return;
+  const page = Math.max(1, Math.floor(els.list.clientHeight / ROW_H) - 1);
+  const to = {
+    ArrowDown: active + 1, ArrowUp: active - 1, PageDown: active + page,
+    PageUp: active - page, Home: 0, End: shown.length - 1,
+  }[e.key];
+  if (to !== undefined) {
+    e.preventDefault();
+    active = Math.min(shown.length - 1, Math.max(0, to));
+    // bring the row into view before painting it (only the rows in view exist)
+    const top = active * ROW_H, h = els.list.clientHeight;
+    if (top < els.list.scrollTop) els.list.scrollTop = top;
+    else if (top + ROW_H > els.list.scrollTop + h) els.list.scrollTop = top + ROW_H - h;
+    paintRows();
+  } else if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    select(shown[active].r, true);
   }
 }
 
 function select(refdes, zoom) {
   selected = selected === refdes ? null : refdes;
+  const i = shown.findIndex((c) => c.r === selected);
+  if (i >= 0) active = i;   // a part picked on the board is the list's row too
   paintRows();
   showDetail();
   if (selected && zoom) zoomTo(selected);
   draw();
+  const c = selected && comps().find((x) => x.r === selected);
+  els.announce.textContent = c ? `${c.r} selected${c.f ? `, ${c.f}` : ""}` : "Selection cleared";
 }
 
 function showDetail() {
@@ -1340,6 +1398,7 @@ function wireEvents() {
   });
 
   addEventListener("keydown", onKey);
+  els.list.addEventListener("keydown", onListKey);
 
   /* The stylesheet cannot reach a canvas, so the board is redrawn when the
      theme moves -- by the button, or by the OS flipping while the choice is
@@ -1381,9 +1440,30 @@ function updateHover(e, here) {
 
 function onKey(e) {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+  // Ctrl+F is the browser's find, Alt+Left its Back: only bare keys are ours
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
   const k = e.key.toLowerCase();
   if (e.key === "Escape") {
     selected = null; netHi = null; paintRows(); showDetail(); draw();
+    return;
+  }
+  /* The single-letter keys act only with focus on the drawing (or nowhere in
+     particular): on a sidebar button, "b" pressed by a screen reader's quick
+     navigation would otherwise flip the board over. */
+  if (e.target !== els.stage && e.target !== document.body) return;
+  const pan = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+  if (pan && e.target === els.stage) {
+    e.preventDefault();
+    vx += pan[0] * 60; vy += pan[1] * 60;
+    draw();
+  } else if ((k === "+" || k === "=" || k === "-") && e.target === els.stage) {
+    e.preventDefault();
+    const [cw, ch] = stageSize();
+    const f = k === "-" ? 1 / 1.25 : 1.25;
+    vx = cw / 2 - (cw / 2 - vx) * f;
+    vy = ch / 2 - (ch / 2 - vy) * f;
+    vs *= f;
+    draw();
   } else if (k === "f") {
     fitView(); draw();
   } else if (k === "t") {
