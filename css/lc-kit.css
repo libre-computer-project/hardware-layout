@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:de3f6b85c752d01fb787bec3e2272b8228e03ce29b14344fa9c46b1d571c2542 */
+/* lc-kit 1 sha256:7c8799fb8f3f4dfebf0bd93a874ccd2753074ea7d014da24209ba3338197cea2 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -69,6 +69,14 @@ html.dark {
 
 html, body { height: 100%; }
 
+/* Two page shapes. An app shell (the layout viewer, the power tree) is one
+   window tall and scrolls only inside its panes. A document page (the
+   pinout, the memory map, education) scrolls as a whole: its body carries
+   class="lc-doc" and grows with its content -- a body held to the window
+   would be the sticky title bar's containing block, and the bar would ride
+   off the top after one screen. */
+body.lc-doc { height: auto; min-height: 100%; }
+
 body {
   display: flex;
   flex-direction: column;
@@ -90,8 +98,8 @@ a:hover { text-decoration: underline; }
 
 /* Sticky on every site (from 700px up; a phone's bar is too tall to pin, see
    below): an app-shell page never scrolls, so it changes nothing there; a
-   page whose document scrolls (the pinout when narrow, the memory map,
-   education) keeps its title bar in view, the same everywhere. */
+   document page (body.lc-doc: the pinout, the memory map, education) keeps
+   its title bar in view, the same everywhere. */
 .lc-topbar {
   flex: none;
   display: flex;
@@ -249,11 +257,10 @@ html.dark {
   --c-misc: #6c757d;
 }
 
-/* The switch between the two hardware tools. It sits where the subtitle used
-   to, because it says the same thing -- which tool this is -- and additionally
-   says what the other one is, which a visitor otherwise has no way to find out
-   from here. The current tool stays plain text: a link to the page you are on
-   is a dead control that costs a click to discover. */
+/* The switch between the Libre Computer sites (written by sync.py, NAV). It
+   says which site this is and what the others are. The current one is a link
+   to its own root, marked aria-current: on a multi-page site it is the way
+   home, and on a tool it resets the page (the query is dropped). */
 /* The site links wrap. Five sites in one unbreakable row ran 131px past a
    375px phone and dragged every page sideways; wrapped, the row simply gets
    taller. The brand wraps for the same reason. */
@@ -447,8 +454,12 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   /* The search box grows into whatever its row leaves, so the board's own
      links (setBoardLinks) share its row instead of taking one of their own. */
   .lc-controls input[type="search"] { flex: 1 1 9rem; width: auto; min-width: 0; }
-  /* 16px exactly: below it Safari zooms the page when a field takes focus,
-     and the only way back out of that zoom is a pinch. */
+}
+
+/* 16px exactly on a narrow screen or any touch screen (a tablet is wider
+   than the narrow layout): below it Safari zooms the page when a field takes
+   focus, and the only way back out of that zoom is a pinch. */
+@media (max-width: 819.98px), (pointer: coarse) {
   .lc-controls select,
   .lc-controls input { font-size: 16px; }
 }

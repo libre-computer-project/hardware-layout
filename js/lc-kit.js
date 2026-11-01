@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:3d4bc24711bef4d4dd2f287952e7db9ee789eb61beb78bd6315d3116eebab2a1 */
+/* lc-kit 1 sha256:27572519ca4661952a8e8e42054b25fe82e112b3419a24af47b4c0883e7d55cd */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -182,13 +182,19 @@ export function mountSiteSwitch(root = document) {
  */
 export function showHiddenFlag(count, title) {
   const brand = document.querySelector(".lc-brand");
-  if (!brand || document.getElementById("lc-hidden-flag")) return null;
-  const flag = document.createElement("span");
-  flag.id = "lc-hidden-flag";
-  flag.className = "lc-flag";
+  let flag = document.getElementById("lc-hidden-flag");
+  if (!brand || !count) {  // (nothing hidden here: no flag)
+    if (flag) flag.remove();
+    return null;
+  }
+  if (!flag) {  // (a second call updates the one flag)
+    flag = document.createElement("span");
+    flag.id = "lc-hidden-flag";
+    flag.className = "lc-flag";
+    brand.appendChild(flag);
+  }
   flag.textContent = `+${count} unlisted`;
   flag.title = title || "?hidden=1: boards not yet public are listed";
-  brand.appendChild(flag);
   return flag;
 }
 
