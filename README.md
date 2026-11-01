@@ -63,6 +63,11 @@ tools/check-site.py        the pre-publish gate CI runs
 tools/check-kit.py         proves the vendored shell has not been hand-edited
 ```
 
+A board marked `hidden` in `data/boards.json` (pre-production, unreleased, or
+another maker's reference) is listed and opened only under `?hidden=1`. That is
+a menu filter, not access control, by decision (operator, 2026-11-01): its
+`data/<id>.json` and copper file are published like every other board's.
+
 **Do not edit `css/lc-kit.css` or `js/lc-kit.js` here.** They are the shell this
 site shares with the [GPIO pinout](https://gpio.hardware.libre.computer), and
 each carries a checksum of its own body in its first line.
