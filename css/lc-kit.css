@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:7c8799fb8f3f4dfebf0bd93a874ccd2753074ea7d014da24209ba3338197cea2 */
+/* lc-kit 1 sha256:ea77f38bd956111f902079d6057fb57f4dc1179875c21db263e4ba0574caaaed */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -112,6 +112,7 @@ a:hover { text-decoration: underline; }
   position: sticky;
   top: 0;
   z-index: 10;
+  font-size: 14px;  /* (the bar's own, whatever size a site sets its body text) */
 }
 
 /* CENTRED, NOT BASELINE-ALIGNED. The name's first flex item is the logo, an
@@ -397,18 +398,17 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 .lc-theme-btn[data-theme="light"],
 .lc-theme-btn[data-theme="dark"] { border-color: currentColor; }
 
-/* THE THEME CONTROL KEEPS THE CORNER. The topbar wraps, and the button is its
-   last child, so on a narrow screen it wrapped onto a line of its own below
-   the board picker and the search box -- the one control whose position a
-   reader relies on, moving with the content around it. Pinned to the top
-   right, it is where it is on a desktop, and the row it used to occupy goes
-   back to the page. The padding reserves its width so a long select cannot
-   run underneath. */
-@media (max-width: 820px) {
-  /* (the sticky bar is the theme button's containing block) */
-  .lc-topbar { padding-right: 104px; }
-  .lc-theme-btn { position: absolute; top: 8px; right: 16px; }
-}
+/* THE THEME CONTROL KEEPS THE CORNER, at every width. The topbar wraps, and
+   the button is its last child, so whenever the controls filled the first row
+   (a phone; a tool's board picker, board links and search below ~1370px) it
+   wrapped onto a line of its own at the left -- the one control whose
+   position a reader relies on, moving with the content around it. Pinned to
+   the top right it is always in the same place, and the row it used to take
+   goes back to the page. The padding reserves its width so a long select
+   cannot run underneath. (The bar is positioned -- sticky, or relative on a
+   phone -- so it is the button's containing block.) */
+.lc-topbar { padding-right: 104px; }
+.lc-theme-btn { position: absolute; top: 8px; right: 16px; }
 
 @media (max-width: 560px) {
   /* The label goes before the control does: the icon plus the title attribute
