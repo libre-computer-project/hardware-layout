@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:045c7a415cf7bf3be3f3cb42cc380451d18d56116e80cdf7114d9fceadfd730e */
+/* lc-kit 1 sha256:10479893ced77a01062c927f96ffaabf5978a9ab03d4ca9ee9853acf6cc7b514 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -37,6 +37,10 @@
   --bg-raised: #f8fafc;
   --bg-sunken: #eef2f6;
   --border: #d8e0e8;
+  /* A field's edge is the only thing that says "type here", so it needs 3:1
+     on the page (WCAG 1.4.11); --border is a divider and stays quiet.
+     3.56:1 on --bg, 3.41:1 on --bg-raised. */
+  --border-field: #7d8996;
   --text: #0f172a;
   --text-dim: #5a6673;
   /* Blue TEXT on the page ground, so it darkens on white (#0077b0 is 4.92:1)
@@ -57,6 +61,7 @@ html.dark {
   --bg-raised: #1d2026;
   --bg-sunken: #0e1013;
   --border: #33383f;
+  --border-field: #6b737d;   /* 3.77:1 on --bg, 3.40:1 on --bg-raised */
   --text: #e8eaed;
   --text-dim: #9aa0a6;
   --accent: #4da3ff;
@@ -327,6 +332,59 @@ a.lc-site:focus-visible {
   .lc-board-links a { display: inline-block; padding: 10px 0; line-height: 20px; }
 }
 
+/* The second bar under the title bar, for a family of sites behind one switcher
+   entry (Software: U-Boot, Memory, Linux). Its label and site links are
+   written by sync.py (SUBNAV); the site's own pages sit at the far end, in
+   .lc-subnav-pages. The same voice as education's section bar. */
+.lc-subnav {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 7px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  align-items: baseline;
+}
+.lc-subnav-sites,
+.lc-subnav-pages {
+  display: flex;
+  align-items: baseline;
+  gap: 4px 18px;
+}
+.lc-subnav-pages { margin-left: auto; }
+.lc-subnav a { color: var(--text-dim); white-space: nowrap; }
+.lc-subnav a:hover { color: var(--accent); text-decoration: none; }
+.lc-subnav a[aria-current] { color: var(--text); font-weight: 600; }
+.lc-subnav a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.lc-subnav-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+/* A phone: one sideways-scrolling row, not a wrap of single links. */
+@media (max-width: 819.98px) {
+  .lc-subnav {
+    flex-wrap: nowrap;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .lc-subnav::-webkit-scrollbar { display: none; }
+  .lc-subnav a { display: inline-block; padding: 10px 0; line-height: 20px; }
+  .lc-subnav-label,
+  .lc-subnav-sites,
+  .lc-subnav-pages { flex: none; }
+}
+
 /* A pill for a state the visitor should not have to infer, e.g. that the board
    picker is currently listing boards nobody can buy yet. */
 .lc-flag {
@@ -365,7 +423,7 @@ input[type="search"],
 input[type="text"] {
   background: var(--bg);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-field);
   border-radius: 5px;
   padding: 5px 8px;
   font: inherit;
@@ -376,6 +434,34 @@ input[type="search"]:hover,
 input[type="text"]:hover { border-color: var(--text-dim); }
 input[type="search"] { width: 190px; }
 input[type="search"]::placeholder { color: var(--text-dim); }
+
+/* ---- skip link, visually hidden ----------------------------------------- */
+
+/* The first Tab stop on every page: past the title bar to the page's own
+   content (<a class="lc-skip" href="#main">, the target a <main id="main">). */
+.lc-skip {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 50;
+  padding: 6px 10px;
+  background: var(--bg-raised);
+  color: var(--text);
+  border: 1px solid var(--border-field);
+  border-radius: 5px;
+}
+.lc-skip:focus { left: 8px; top: 8px; }
+
+/* Read by a screen reader, not shown: a page heading the layout carries
+   visually already, a status line. */
+.lc-vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 /* ---- theme button ------------------------------------------------------ */
 
