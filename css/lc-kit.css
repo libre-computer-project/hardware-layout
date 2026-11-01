@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:ec6d3b7806dd5b4d34758081c4c41365be094af4744c9e06cb659213425d47b5 */
+/* lc-kit 1 sha256:650ca4f016c6da967555b8277a4b7cc40244188d5d76aea587011356626b5379 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -536,6 +536,35 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   color: var(--text-dim);
 }
 .lc-panel h3:first-child { margin-top: 0; }
+
+/* A data table, the same on every site: ruled rows, small dim uppercase
+   column headers like the panel headings above. A site adds only what its
+   data needs (a sticky header, a highlighted row, a reading size). Wrap it in
+   .lc-table-scroll where it may be wider than a phone: the table keeps its
+   columns and scrolls sideways inside its own box, never the page. */
+.lc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.lc-table caption { text-align: left; color: var(--text-dim); padding-bottom: .4rem; }
+.lc-table th,
+.lc-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.lc-table thead th,
+.lc-table > tr:first-child > th {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .9px;
+  color: var(--text-dim);
+}
+.lc-table tbody th { font-weight: 600; }
+.lc-table-scroll { overflow-x: auto; }
 
 .lc-seg { display: flex; gap: 5px; }
 .lc-seg button {
