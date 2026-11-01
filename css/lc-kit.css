@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:bca32f996d0d052e3e7bb8cfdfac832145bc2508a6ca326e44dcfb81a5d9d746 */
+/* lc-kit 1 sha256:e4f3b6491079e329bfb15229b27823d706f9212b3fea5bc8233f68f70f6b8046 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -609,6 +609,34 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   font-size: 12px;
 }
 .lc-tooltip[hidden] { display: none; }
+
+/* A chip: a small bordered token that picks one of a set (a mux on the
+   pinout's pin, a step of the power sequence). It is a <button> with
+   aria-pressed, so it takes focus and says which one is picked. Pressed is
+   an inset accent ring plus the accent wash: not an outline, which is the
+   focus ring, and not the border, which a site may use for a state (the
+   power tool's on and absent). The site adds a dot or a font. */
+.lc-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.lc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.lc-chip:hover { border-color: var(--text-dim); }
+.lc-chip[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 16%, var(--bg));
+  color: var(--text);
+}
 
 .lc-seg { display: flex; gap: 5px; }
 .lc-seg button {
