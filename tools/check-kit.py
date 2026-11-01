@@ -77,35 +77,41 @@ def check_products(problems):
                 problems.append(f"{PRODUCTS}[{bid}].{key}: {b[key]!r} is not https://{host}/...")
 
 
-# Every kit page carries a Content-Security-Policy <meta> (the sites are
-# static files; their hosts set no headers we control), ahead of every
-# script, allowing each inline script -- the theme snippet above all -- by
-# its sha256 and nothing more. A kit re-sync that changes the snippet fails
-# here until the page's hash is updated with it.
-CSP = re.compile(r"""<meta\s[^>]*http-equiv\s*=\s*["']?content-security-policy["']?[^>]*>""", re.I)
-CONTENT = re.compile(r"""\scontent\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.I)
-# every inline script a browser runs: any attributes, any case, but no src
-INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\bsrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
+# Every page carries a Content-Security-Policy <meta> (the sites are static
+# files; their hosts set no headers we control), allowing each inline script
+# -- the theme snippet above all -- by its sha256 and nothing more. A kit
+# re-sync that changes the snippet fails here until the page's hash follows.
+#
+# The check does not try to parse HTML as a browser would (round 10 found a
+# pattern-matcher can be talked round: a meta inside <title>, a stray <div>
+# closing <head>, a "<!-->" comment). It accepts ONE shape instead: the page
+# opens with the doctype, <html>, <head>, the charset meta, at most one plain
+# comment, then the policy meta in exactly this form -- nothing a browser
+# could read differently. Anything else is refused, not interpreted.
+CANONICAL_HEAD = re.compile(
+    r'<!DOCTYPE html>\s*<html(?: lang="[a-z-]+")?>\s*<head>\s*<meta charset="utf-8">\s*'
+    r"(?:<!--(?!-?>)(?:(?!--!?>)[^<])*-->\s*)?"   # one plain comment, no "<", no "<!-->" / "--!>"
+    r'<meta http-equiv="Content-Security-Policy" content="([^"<>]*)">')
+# every inline script a browser could run: any attributes, any case, no src=
+INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
 SCRIPT_DIRECTIVES = ("script-src", "script-src-elem", "script-src-attr")
 SHA = re.compile(r"'sha256-([A-Za-z0-9+/=]+)'")
+ASCII_WS = re.compile(r"[\t\n\f\r ]+")   # CSP splits on ASCII whitespace only
 
 
 def check_csp(html):
-    html = re.sub(r"<!--.*?-->", "", html, flags=re.S)  # a commented-out meta is no policy
-    head_end = re.search(r"</head\s*>|<body\b", html, re.I)
-    head = html[:head_end.start()] if head_end else html
-    m = CSP.search(head)
+    m = CANONICAL_HEAD.match(html)
     if not m:
-        return ["no Content-Security-Policy <meta> in <head>"]
-    first = re.search(r"<script\b", html, re.I)
-    if first and m.start() > first.start():
-        return ["the Content-Security-Policy <meta> comes after a script"]
-    c = CONTENT.search(m.group(0))
-    # as the browser reads it: entities decoded, keywords in any case
-    policy = html_mod.unescape((c.group(1) if c.group(1) is not None else c.group(2)) if c else "")
+        return ["the page does not open with <!DOCTYPE html>, <html>, <head>, the charset "
+                "meta, at most one plain comment, then the Content-Security-Policy meta"]
+    policy = html_mod.unescape(m.group(1))
+    # printable ASCII only: a non-breaking space or a control character would
+    # split differently in a browser than here
+    if not re.fullmatch(r"[\t\n\f\r\x20-\x7e]*", policy):
+        return ["the policy holds a character outside printable ASCII"]
     directives = {}
     for part in policy.split(";"):
-        words = part.split()
+        words = [w for w in ASCII_WS.split(part) if w]
         if words:
             directives.setdefault(words[0].lower(), words[1:])
     if "script-src" not in directives:
@@ -167,13 +173,12 @@ def main():
                     f"on every load.")
 
     check_products(problems)
-    # every page in the tree (a generated site keeps its pages in directories)
+    # every page in the tree, kit or not (a generated site keeps its pages in
+    # directories, and a redirect stub is a page too)
     for page in sorted(ROOT.rglob("*.html")):
         if any(part.startswith(".") or part in ("node_modules", "tools") for part in page.relative_to(ROOT).parts):
             continue
-        html = page.read_text()
-        if "lc-kit." in html:
-            problems += [f"{page.relative_to(ROOT)}: {p}" for p in check_csp(html)]
+        problems += [f"{page.relative_to(ROOT)}: {p}" for p in check_csp(page.read_text())]
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)
