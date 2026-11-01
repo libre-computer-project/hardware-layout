@@ -29,6 +29,7 @@ ahead of its scripts, allowing exactly its inline scripts by sha256.
 
 import base64
 import hashlib
+import html as html_mod
 import json
 import re
 import sys
@@ -81,22 +82,44 @@ def check_products(problems):
 # script, allowing each inline script -- the theme snippet above all -- by
 # its sha256 and nothing more. A kit re-sync that changes the snippet fails
 # here until the page's hash is updated with it.
-CSP = re.compile(r'<meta http-equiv="Content-Security-Policy" content="([^"]*)"')
-INLINE_SCRIPT = re.compile(r"<script>(.*?)</script>", re.S)
+CSP = re.compile(r"""<meta\s[^>]*http-equiv\s*=\s*["']?content-security-policy["']?[^>]*>""", re.I)
+CONTENT = re.compile(r"""\scontent\s*=\s*(?:"([^"]*)"|'([^']*)')""", re.I)
+# every inline script a browser runs: any attributes, any case, but no src
+INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\bsrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
+SCRIPT_DIRECTIVES = ("script-src", "script-src-elem", "script-src-attr")
+SHA = re.compile(r"'sha256-([A-Za-z0-9+/=]+)'")
 
 
 def check_csp(html):
-    m = CSP.search(html)
+    html = re.sub(r"<!--.*?-->", "", html, flags=re.S)  # a commented-out meta is no policy
+    head_end = re.search(r"</head\s*>|<body\b", html, re.I)
+    head = html[:head_end.start()] if head_end else html
+    m = CSP.search(head)
     if not m:
-        return ["no Content-Security-Policy <meta>"]
-    first = html.find("<script")
-    if first != -1 and m.start() > first:
+        return ["no Content-Security-Policy <meta> in <head>"]
+    first = re.search(r"<script\b", html, re.I)
+    if first and m.start() > first.start():
         return ["the Content-Security-Policy <meta> comes after a script"]
-    policy = m.group(1).replace("&#x27;", "'").replace("&#39;", "'").replace("&amp;", "&")
-    script_src = re.search(r"script-src([^;]*)", policy)
-    if not script_src or "'unsafe-inline'" in script_src.group(1):
-        return ["the policy has no script-src, or allows any inline script"]
-    allowed = set(re.findall(r"'sha256-([A-Za-z0-9+/=]+)'", policy))
+    c = CONTENT.search(m.group(0))
+    # as the browser reads it: entities decoded, keywords in any case
+    policy = html_mod.unescape((c.group(1) if c.group(1) is not None else c.group(2)) if c else "")
+    directives = {}
+    for part in policy.split(";"):
+        words = part.split()
+        if words:
+            directives.setdefault(words[0].lower(), words[1:])
+    if "script-src" not in directives:
+        return ["the policy has no script-src"]
+    allowed, out = set(), []
+    for name in SCRIPT_DIRECTIVES:
+        for source in directives.get(name, []):
+            h = SHA.fullmatch(source)
+            if h:
+                allowed.add(h.group(1))
+            elif source.lower() != "'self'":
+                out.append(f"{name} allows {source!r}: only 'self' and 'sha256-…' hashes")
+    if out:
+        return out
     needed = {base64.b64encode(hashlib.sha256(s.encode()).digest()).decode()
               for s in INLINE_SCRIPT.findall(html)}
     out = [f"an inline script (sha256-{h}) the policy does not allow" for h in sorted(needed - allowed)]
@@ -144,10 +167,13 @@ def main():
                     f"on every load.")
 
     check_products(problems)
-    for page in sorted(ROOT.glob("*.html")):
+    # every page in the tree (a generated site keeps its pages in directories)
+    for page in sorted(ROOT.rglob("*.html")):
+        if any(part.startswith(".") or part in ("node_modules", "tools") for part in page.relative_to(ROOT).parts):
+            continue
         html = page.read_text()
         if "lc-kit." in html:
-            problems += [f"{page.name}: {p}" for p in check_csp(html)]
+            problems += [f"{page.relative_to(ROOT)}: {p}" for p in check_csp(html)]
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)
