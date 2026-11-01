@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:e4f3b6491079e329bfb15229b27823d706f9212b3fea5bc8233f68f70f6b8046 */
+/* lc-kit 1 sha256:f150af3e896c1fa02fcd8815abde28ce643fed45124697238266f8392519459d */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -94,7 +94,7 @@ a:hover { text-decoration: underline; }
 /* Monospace text in the one stack (zero specificity: a site's own rule wins) */
 :where(code, kbd, samp, pre) { font-family: var(--mono); }
 
-:where(button, select, input, a):focus-visible {
+:where(button, select, input, a, [role="button"][tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
