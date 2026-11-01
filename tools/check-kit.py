@@ -88,10 +88,17 @@ def check_products(problems):
 # opens with the doctype, <html>, <head>, the charset meta, at most one plain
 # comment, then the policy meta in exactly this form -- nothing a browser
 # could read differently. Anything else is refused, not interpreted.
+# (HTML whitespace only: Python's \s also matches \x0b, \xa0, U+2028 ...,
+# any of which closes <head> in a browser and drops the policy into <body>)
+_WS = r"[\t\n\f\r ]*"
 CANONICAL_HEAD = re.compile(
-    r'<!DOCTYPE html>\s*<html(?: lang="[a-z-]+")?>\s*<head>\s*<meta charset="utf-8">\s*'
-    r"(?:<!--(?!-?>)(?:(?!--!?>)[^<])*-->\s*)?"   # one plain comment, no "<", no "<!-->" / "--!>"
+    rf'<!DOCTYPE html>{_WS}<html(?: lang="[a-z-]+")?>{_WS}<head>{_WS}<meta charset="utf-8">{_WS}'
+    rf"(?:<!--(?!-?>)(?:(?!--!?>)[^<])*-->{_WS})?"   # one plain comment, no "<", no "<!-->" / "--!>"
     r'<meta http-equiv="Content-Security-Policy" content="([^"<>]*)">')
+# A document a browser runs script in that is not a page of ours: an SVG
+# opened directly has no CSP, so it may carry no script at all.
+SVG_ACTIVE = re.compile(r"<script\b|\son[a-z]+\s*=|javascript:|<foreignObject\b", re.I)
+PAGE_SUFFIXES = {".html", ".htm", ".xhtml"}
 # every inline script a browser could run: any attributes, any case, no src=
 INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
 SCRIPT_DIRECTIVES = ("script-src", "script-src-elem", "script-src-attr")
@@ -173,12 +180,19 @@ def main():
                     f"on every load.")
 
     check_products(problems)
-    # every page in the tree, kit or not (a generated site keeps its pages in
-    # directories, and a redirect stub is a page too)
-    for page in sorted(ROOT.rglob("*.html")):
-        if any(part.startswith(".") or part in ("node_modules", "tools") for part in page.relative_to(ROOT).parts):
+    # every document in the tree a browser could run script in, kit or not
+    # (a generated site keeps its pages in directories, a redirect stub is a
+    # page too, and tools/ is served as well); only git's own dir is skipped
+    for doc in sorted(p for p in ROOT.rglob("*") if p.is_file()):
+        rel = doc.relative_to(ROOT)
+        if rel.parts[0] in (".git", "node_modules"):
             continue
-        problems += [f"{page.relative_to(ROOT)}: {p}" for p in check_csp(page.read_text())]
+        suffix = doc.suffix.lower()
+        if suffix in PAGE_SUFFIXES:
+            problems += [f"{rel}: {p}" for p in check_csp(doc.read_text(errors="replace"))]
+        elif suffix == ".svg" and SVG_ACTIVE.search(doc.read_text(errors="replace")):
+            problems.append(f"{rel}: an SVG with script, an event handler, javascript: or "
+                            f"foreignObject (opened directly it runs with no policy)")
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)
