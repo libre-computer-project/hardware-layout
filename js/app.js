@@ -9,7 +9,7 @@
 
 "use strict";
 
-import { mountShell, setBoardLinks, token } from "./lc-kit.js";
+import { mountShell, setBoardLinks, showHiddenFlag, token } from "./lc-kit.js";
 
 /* Category display names, and the order the sidebar lists them in. The order
    is by how much of the board the class explains, not alphabetical: someone
@@ -45,7 +45,6 @@ const $ = (id) => document.getElementById(id);
 const els = {
   select: $("board-select"),
   search: $("search"),
-  brand: document.querySelector(".lc-brand"),
   notices: $("notices"),
   meta: $("board-meta"),
   sideSeg: $("side-seg"),
@@ -181,12 +180,8 @@ function buildSelect() {
 /* Say so, loudly, when the picker is showing boards nobody can buy yet. */
 function markHiddenMode() {
   if (!showHidden) return;
-  const n = boardIndex.filter((b) => b.hidden).length;
-  const flag = document.createElement("span");
-  flag.className = "lc-flag";
-  flag.textContent = `+${n} unlisted`;
-  flag.title = "?hidden=1 — pre-production, unreleased and reference designs are listed";
-  els.brand.appendChild(flag);
+  showHiddenFlag(boardIndex.filter((b) => b.hidden).length,
+    "?hidden=1 — pre-production, unreleased and reference designs are listed");
 }
 
 /* ---- loading a board ----------------------------------------------------- */

@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:d112b7124e961268fdcd13af99c5ad02c89730bf85c870a765030ceeb3fd21d1 */
+/* lc-kit 1 sha256:3d4bc24711bef4d4dd2f287952e7db9ee789eb61beb78bd6315d3116eebab2a1 */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -173,6 +173,23 @@ export function mountSiteSwitch(root = document) {
   }
   refresh();
   return links;
+}
+
+/**
+ * Say so, in the brand row, when ?hidden=1 lists boards nobody can buy yet
+ * (pre-production, unreleased, another maker's reference): the same flag on
+ * every tool. `count` is how many the switch added; `title` says which kinds.
+ */
+export function showHiddenFlag(count, title) {
+  const brand = document.querySelector(".lc-brand");
+  if (!brand || document.getElementById("lc-hidden-flag")) return null;
+  const flag = document.createElement("span");
+  flag.id = "lc-hidden-flag";
+  flag.className = "lc-flag";
+  flag.textContent = `+${count} unlisted`;
+  flag.title = title || "?hidden=1: boards not yet public are listed";
+  brand.appendChild(flag);
+  return flag;
 }
 
 /**
