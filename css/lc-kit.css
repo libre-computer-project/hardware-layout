@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:650ca4f016c6da967555b8277a4b7cc40244188d5d76aea587011356626b5379 */
+/* lc-kit 1 sha256:6b29c5f2e1e98e082fa952a16d95acf09bba82d6646979dc36558cfa3a5d6467 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -30,6 +30,8 @@
 
 :root {
   color-scheme: light;
+  /* one monospace stack for every site (pad names, addresses, code, keys) */
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
   --bg: #ffffff;
   --bg-raised: #f8fafc;
@@ -88,6 +90,9 @@ body {
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* Monospace text in the one stack (zero specificity: a site's own rule wins) */
+:where(code, kbd, samp, pre) { font-family: var(--mono); }
 
 :where(button, select, input, a):focus-visible {
   outline: 2px solid var(--accent);
@@ -499,7 +504,7 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 .lc-notice.error {
   background: color-mix(in srgb, var(--danger) 14%, var(--bg));
 }
-.lc-notice code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.lc-notice code { font-family: var(--mono); }
 /* The accent on the caution wash is too light for the notice's type.
    The underline is what says the words are a link. */
 .lc-notice a { color: var(--text); text-decoration: underline; }
@@ -565,6 +570,51 @@ input[type="search"]::placeholder { color: var(--text-dim); }
 }
 .lc-table tbody th { font-weight: 600; }
 .lc-table-scroll { overflow-x: auto; }
+/* A table in a narrow side panel (the pinout's pin detail): the same
+   headers, tighter cells, values in the monospace stack. */
+.lc-table.lc-compact { font-size: 13px; }
+.lc-table.lc-compact th,
+.lc-table.lc-compact td { padding: 3px 10px 3px 0; }
+.lc-table.lc-compact td { font-family: var(--mono); font-size: 12.5px; }
+
+/* The small dim uppercase label: a panel heading, a column title, a
+   section kicker -- the same voice as .lc-panel h3 and a table's header. */
+.lc-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .9px;
+  color: var(--text-dim);
+}
+
+/* A colour swatch: one small rounded square, wherever a colour is keyed (a
+   legend, a slot in a list, a toggle). The site sets its colour; a site that
+   also shows a state with it (the power tree's on/off) adds that itself. */
+.lc-swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  flex: none;
+  vertical-align: -1px;
+}
+
+/* The hover tooltip: follows the theme like the panels, never a fixed dark
+   box. The site positions it (fixed to the window or absolute in its stage)
+   and picks its font (the pinout's pad names are monospace). */
+.lc-tooltip {
+  z-index: 20;
+  pointer-events: none;
+  max-width: 340px;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+}
+.lc-tooltip[hidden] { display: none; }
 
 .lc-seg { display: flex; gap: 5px; }
 .lc-seg button {
@@ -609,7 +659,7 @@ input[type="search"]::placeholder { color: var(--text-dim); }
    the whole row takes the label below body text in both themes. */
 .lc-toggle[aria-pressed="false"] { color: var(--text-dim); }
 .lc-toggle[aria-pressed="false"] .lc-swatch { opacity: .45; }
-.lc-toggle .lc-swatch { flex: none; width: 11px; height: 11px; border-radius: 2px; }
+.lc-toggle .lc-swatch { vertical-align: 0; }
 .lc-toggle .lc-name {
   flex: 1;
   overflow: hidden;
