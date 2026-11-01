@@ -21,9 +21,13 @@ And data/lc-products.json, where a site has it: the board links beside the
 board picker may only name boards this site lists unhidden, and link only to
 https://libre.computer and https://cad.place.
 
+And every page that uses the kit carries a Content-Security-Policy <meta>
+ahead of its scripts, allowing exactly its inline scripts by sha256.
+
     tools/check-kit.py          exit 0 clean, 1 with findings
 """
 
+import base64
 import hashlib
 import json
 import re
@@ -72,6 +76,34 @@ def check_products(problems):
                 problems.append(f"{PRODUCTS}[{bid}].{key}: {b[key]!r} is not https://{host}/...")
 
 
+# Every kit page carries a Content-Security-Policy <meta> (the sites are
+# static files; their hosts set no headers we control), ahead of every
+# script, allowing each inline script -- the theme snippet above all -- by
+# its sha256 and nothing more. A kit re-sync that changes the snippet fails
+# here until the page's hash is updated with it.
+CSP = re.compile(r'<meta http-equiv="Content-Security-Policy" content="([^"]*)"')
+INLINE_SCRIPT = re.compile(r"<script>(.*?)</script>", re.S)
+
+
+def check_csp(html):
+    m = CSP.search(html)
+    if not m:
+        return ["no Content-Security-Policy <meta>"]
+    first = html.find("<script")
+    if first != -1 and m.start() > first:
+        return ["the Content-Security-Policy <meta> comes after a script"]
+    policy = m.group(1).replace("&#x27;", "'").replace("&#39;", "'").replace("&amp;", "&")
+    script_src = re.search(r"script-src([^;]*)", policy)
+    if not script_src or "'unsafe-inline'" in script_src.group(1):
+        return ["the policy has no script-src, or allows any inline script"]
+    allowed = set(re.findall(r"'sha256-([A-Za-z0-9+/=]+)'", policy))
+    needed = {base64.b64encode(hashlib.sha256(s.encode()).digest()).decode()
+              for s in INLINE_SCRIPT.findall(html)}
+    out = [f"an inline script (sha256-{h}) the policy does not allow" for h in sorted(needed - allowed)]
+    out += [f"the policy allows sha256-{h}, which no inline script has" for h in sorted(allowed - needed)]
+    return out
+
+
 def main():
     problems = []
 
@@ -112,6 +144,10 @@ def main():
                     f"on every load.")
 
     check_products(problems)
+    for page in sorted(ROOT.glob("*.html")):
+        html = page.read_text()
+        if "lc-kit." in html:
+            problems += [f"{page.name}: {p}" for p in check_csp(html)]
 
     if problems:
         print(f"FAIL  {len(problems)} finding(s):", file=sys.stderr)
