@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:ea77f38bd956111f902079d6057fb57f4dc1179875c21db263e4ba0574caaaed */
+/* lc-kit 1 sha256:ec6d3b7806dd5b4d34758081c4c41365be094af4744c9e06cb659213425d47b5 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -406,7 +406,10 @@ input[type="search"]::placeholder { color: var(--text-dim); }
    the top right it is always in the same place, and the row it used to take
    goes back to the page. The padding reserves its width so a long select
    cannot run underneath. (The bar is positioned -- sticky, or relative on a
-   phone -- so it is the button's containing block.) */
+   phone -- so it is the button's containing block.) The reserve applies to
+   every row, so when a tool's controls wrap to a second row (about 820 to
+   1430px) that row ends 104px short of the edge: the cost of a button that
+   never moves. */
 .lc-topbar { padding-right: 104px; }
 .lc-theme-btn { position: absolute; top: 8px; right: 16px; }
 
@@ -414,7 +417,6 @@ input[type="search"]::placeholder { color: var(--text-dim); }
   /* The label goes before the control does: the icon plus the title attribute
      still say which state is active. */
   .lc-theme-label { display: none; }
-  .lc-topbar { padding-right: 56px; }
 }
 
 /* THE NARROW BAR IS DELIBERATE ROWS, not whatever wrapping leaves. Below the
