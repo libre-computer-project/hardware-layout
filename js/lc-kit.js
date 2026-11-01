@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:27572519ca4661952a8e8e42054b25fe82e112b3419a24af47b4c0883e7d55cd */
+/* lc-kit 1 sha256:d77de1470f7f4ef74b02ce27f88c55417339380233db519dbca4afeb65ac42ea */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -135,18 +135,21 @@ export function mountShell({ themeButton = true } = {}) {
 }
 
 /**
- * Carry the current query across to the other tool.
+ * Carry the current query across to the other hardware tools (the switcher
+ * links marked data-lc-site; sync.py marks only those between the GPIO,
+ * layout and power tools).
  *
- * Both sites name the same boards by the same id and both take `?board=` and
- * `?hidden=`, so a visitor looking at a board here should arrive at THAT board
- * there. The two catalogues are not identical -- the pinout has boards with no
- * layout CAD and the layout has pre-production boards with no pinout -- but
- * neither site fails silently on an id it lacks: each falls back to its default
- * and says which board it is showing and why. So the query is passed through
- * whole rather than filtered against a list of the other site's boards, which
- * would be a second copy of that catalogue to keep in step.
+ * The three tools name the same boards by the same id and all take `?board=`
+ * and `?hidden=`, so a visitor looking at a board here should arrive at THAT
+ * board there. The catalogues are not identical -- the pinout has boards with
+ * no layout CAD, the layout has pre-production boards with no pinout, the
+ * power tree draws fewer still -- but no tool fails silently on an id it
+ * lacks: each falls back to its default and says which board it is showing
+ * and why. So the query is passed through whole rather than filtered against
+ * a list of another tool's boards, which would be a second copy of that
+ * catalogue to keep in step.
  *
- * The href cannot be computed once at mount. Both sites keep the selected board
+ * The href cannot be computed once at mount. Each tool keeps the selected board
  * in the URL with history.replaceState, which fires no event, so a link built
  * at load time would still point at whatever board the page opened with. It is
  * recomputed on the events that precede a navigation instead -- pointerdown
