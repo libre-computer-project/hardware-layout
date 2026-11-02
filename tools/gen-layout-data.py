@@ -68,14 +68,14 @@ BOARDS = [
          rev="V2.0-C", src="AML-S905X-CC-V2.0-C_20230418.json"),
     dict(id="aml-s905x-cc-v3", model="AML-S905X-CC-V3", name="Das Potato",
          soc="S905X", vendor="Amlogic", status="unreleased", hidden=True,
-         rev="V3-ICC", src="AML-S905X-CC-V3-ICC_20260104.json"),
+         rev="V3.0B", src="AML-S905X-CC-V3-ICC_20260104.json"),
     # La Frite has no ODB++ export and is imported from the published PADS
     # mechanical DXF instead, so it carries placement, pads, values and hole
     # geometry but no netlist and no copper routing -- see `layers` in
     # boards.json, which is 0 for this board and 8 for the rest.
     dict(id="aml-s805x-ac", model="AML-S805X-AC", name="La Frite",
          soc="S805X", vendor="Amlogic", status="production", hidden=False,
-         rev="V1.0", src="AML-S805X-AC-TOP-190308.json"),
+         rev="V1.0C", src="AML-S805X-AC-TOP-190308.json"),
     dict(id="aml-s805x-ac-v2", model="AML-S805X-AC-V2", name="Das Frite",
          soc="S805X", vendor="Amlogic", status="production", hidden=False,
          rev="V2.0C", src="AML-S805X-AC-V2.0C-0803.json"),
@@ -102,7 +102,7 @@ BOARDS = [
          rev="V0.1", src="MED-MT83-ACE-V0.1-20251205.json"),
     dict(id="med-mt88-mx", model="MED-MT88-MX", name="Virginia",
          soc="MT8370/MT8390", vendor="MediaTek", status="preprod", hidden=True,
-         rev="V0.1", src="MED-G510-V0.1-0805-1.json"),
+         rev="V0.4", src="MED-G510-V0.1-0805-1.json"),
     dict(id="mtk-g500-mmd", model="G500 MMD", name="MT8385 MMD reference",
          soc="MT8385", vendor="MediaTek", status="reference", hidden=True,
          rev="V1", src="G500_MT8385_MMD_LPDDR4X_eMMC_V1_0928A.json"),
@@ -117,11 +117,11 @@ BOARDS = [
     # Renegade V2 and Tritium, like La Frite, have no ODB++ export and are
     # imported from their PADS mechanical DXF pairs (placement, pads and holes;
     # no netlist, no copper). Tritium's pair is the H5 build of the one PCB the
-    # H2+, H3 and H5 variants share. Renegade V2 is a production design that
-    # has not been released, so it is unlisted like V3 of Le Potato. Renegade
+    # H2+, H3 and H5 variants share. Das Renegade (Renegade V2) has only
+    # prototypes so far, so it is unlisted like V3 of Le Potato. Renegade
     # Elite is not here: its DXF carries pads and silkscreen but no part
     # designators.
-    dict(id="roc-rk3328-cc-v2", model="ROC-RK3328-CC-V2", name="Renegade",
+    dict(id="roc-rk3328-cc-v2", model="ROC-RK3328-CC-V2", name="Das Renegade",
          soc="RK3328", vendor="Rockchip", status="unreleased", hidden=True,
          rev="V2.0C", src="TF-XD-RK3328-CC-V2.0C-20221110-TOP.json"),
     dict(id="all-h3-cc", model="ALL-H3-CC", name="Tritium",

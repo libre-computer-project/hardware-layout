@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-11-02",
  "boards": [
   {
    "id": "aml-s905x-cc",
@@ -43,7 +43,7 @@
    "id": "aml-s905x-cc-v3",
    "model": "AML-S905X-CC-V3",
    "name": "Das Potato",
-   "rev": "V3-ICC",
+   "rev": "V3.0B",
    "soc": "S905X",
    "vendor": "Amlogic",
    "status": "unreleased",
@@ -62,7 +62,7 @@
    "id": "aml-s805x-ac",
    "model": "AML-S805X-AC",
    "name": "La Frite",
-   "rev": "V1.0",
+   "rev": "V1.0C",
    "soc": "S805X",
    "vendor": "Amlogic",
    "status": "production",
@@ -178,7 +178,7 @@
    "id": "med-mt88-mx",
    "model": "MED-MT88-MX",
    "name": "Virginia",
-   "rev": "V0.1",
+   "rev": "V0.4",
    "soc": "MT8370/MT8390",
    "vendor": "MediaTek",
    "status": "preprod",
@@ -234,7 +234,7 @@
   {
    "id": "roc-rk3328-cc-v2",
    "model": "ROC-RK3328-CC-V2",
-   "name": "Renegade",
+   "name": "Das Renegade",
    "rev": "V2.0C",
    "soc": "RK3328",
    "vendor": "Rockchip",
