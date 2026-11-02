@@ -118,7 +118,7 @@ BOARDS = [
     # imported from their PADS mechanical DXF pairs (placement, pads and holes;
     # no netlist, no copper). Tritium's pair is the H5 build of the one PCB the
     # H2+, H3 and H5 variants share. Das Renegade (Renegade V2) has only
-    # prototypes so far, so it is unlisted like V3 of Le Potato. Renegade
+    # prototypes so far, so it is unlisted like Das Potato. Renegade
     # Elite is not here: its DXF carries pads and silkscreen but no part
     # designators.
     dict(id="roc-rk3328-cc-v2", model="ROC-RK3328-CC-V2", name="Das Renegade",
