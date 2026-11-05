@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:e657690d97cee420c924318a584bea1f46706115be2c13dc1895a3393b505f55 */
+/* lc-kit 1 sha256:49a98d562651cce432e0f0e8bd59669b63564b67a7129dab7db1aff492e4dc31 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -14,9 +14,11 @@
  * a stylesheet that loses its media query should degrade to the more legible
  * of the two.
  *
- * The dark values are exactly what both sites shipped before this file existed,
- * so adopting the kit changes nothing for a dark visitor and adds a light theme
- * that did not exist.
+ * The values are libre.computer's own (its css/style.css tokens: --bg, --card,
+ * --border, --fg, --muted, --prose-link, --field-border), in both themes,
+ * because these tools open inside its product pages: a tool in a neutral grey
+ * frame on a slate page read as a different site. A change to that palette is
+ * made there and copied here.
  *
  * WHAT BELONGS HERE. The shell and nothing else: page frame, top bar, brand,
  * the controls slot, notices, footer, form controls, focus, and the theme
@@ -35,14 +37,17 @@
 
   --bg: #ffffff;
   --bg-raised: #f8fafc;
-  --bg-sunken: #eef2f6;
-  --border: #d8e0e8;
+  --bg-sunken: #f1f5f9;
+  --border: #e2e8f0;
   /* A field's edge is the only thing that says "type here", so it needs 3:1
      on the page (WCAG 1.4.11); --border is a divider and stays quiet.
-     3.56:1 on --bg, 3.41:1 on --bg-raised. */
-  --border-field: #7d8996;
+     Slate-500, as libre.computer's --field-border: 4.76:1 on --bg, 4.55:1 on
+     --bg-raised, and 3.75 / 3.07 on the dark ground and raised panel, so
+     one value serves both themes. */
+  --border-field: #64748b;
   --text: #0f172a;
-  --text-dim: #5a6673;
+  /* 4.76:1 on --bg, 4.55:1 on --bg-raised, 4.34:1 on --bg-sunken */
+  --text-dim: #64748b;
   /* Blue TEXT on the page ground, so it darkens on white (#0077b0 is 4.92:1)
      and lightens on the dark ground below. Same two shades libre.computer
      uses, and for the same contrast reason. */
@@ -57,14 +62,14 @@
 html.dark {
   color-scheme: dark;
 
-  --bg: #14161a;
-  --bg-raised: #1d2026;
-  --bg-sunken: #0e1013;
-  --border: #33383f;
-  --border-field: #6b737d;   /* 3.77:1 on --bg, 3.40:1 on --bg-raised */
-  --text: #e8eaed;
-  --text-dim: #9aa0a6;
-  --accent: #4da3ff;
+  --bg: #0f172a;
+  --bg-raised: #1e293b;
+  --bg-sunken: #020617;
+  --border: #334155;
+  --border-field: #64748b;   /* 3.75:1 on --bg, 3.07:1 on --bg-raised */
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;       /* 6.96:1 on --bg, 5.71:1 on --bg-raised */
+  --accent: #00a0e9;         /* 6.13:1 on --bg, 5.02:1 on --bg-raised */
   --brass: #c9a227;
   --warn: #f76b15;
   --danger: #f5a3a6;

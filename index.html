@@ -5,7 +5,7 @@
 <!-- Scripts from this site only, plus the inline theme snippet by its sha256
      (tools/check-kit.py recomputes it); data, styles and images same-origin,
      data: for the kit's logo. GitHub Pages sets no headers, so it is a meta. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ACy4pj93O7g7s8NBZ36xdNPdeBUZ5qKl4pgUR78Pd7E='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oHIc59mqgn9ICn5smlJlKAoSorMm9lRvLXPlZJXSqW8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Libre Computer Board Layout</title>
@@ -16,7 +16,7 @@
 <!-- Sets the theme before first paint, so a dark visitor never sees a white
      flash. Must stay inline and must stay ahead of the stylesheets; the copy
      is checked by tools/lc-ui-kit/sync.py against HEAD_SNIPPET in lc-kit.js. -->
-<script>try{var p=localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}</script>
+<script>try{var q=new URLSearchParams(location.search),e=q.get("embed")==="1",t=e&&q.get("theme");if(e)document.documentElement.classList.add("lc-embed");var p=t==="light"||t==="dark"?t:localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(x){}</script>
 </head>
 <body>
 <a class="lc-skip" href="#main">Skip to content</a>

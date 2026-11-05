@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:65abe02e07c8aa20a33ed8ca4db3b0d5e1b69b29a3b516b3caf316431b77ceed */
+/* lc-kit 1 sha256:65b30833ac610053f0785d41296a7f4aa090aac6d7931377e8ad7190688bcd79 */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -398,8 +398,16 @@ export async function setBoardLinks(id) {
  * It has to run before first paint or a dark visitor gets a white flash, which
  * means it cannot be in this module -- a module is deferred by definition. Each
  * page carries it inline; sync.py checks the copies match this text.
+ *
+ * In a frame (?embed=1) it also applies the embed layout and the framing
+ * page's ?theme= -- the same rule as EMBED / FORCED_THEME above -- so the
+ * tool's first paint is already the frame's. Applied only by the module, a
+ * slow link showed the tool's own site chrome, in this origin's stored
+ * theme, for as long as the module took to arrive.
  */
 export const HEAD_SNIPPET =
-  `try{var p=localStorage.getItem("theme")||"auto";` +
+  `try{var q=new URLSearchParams(location.search),e=q.get("embed")==="1",t=e&&q.get("theme");` +
+  `if(e)document.documentElement.classList.add("lc-embed");` +
+  `var p=t==="light"||t==="dark"?t:localStorage.getItem("theme")||"auto";` +
   `if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))` +
-  `document.documentElement.classList.add("dark")}catch(e){}`;
+  `document.documentElement.classList.add("dark")}catch(x){}`;
