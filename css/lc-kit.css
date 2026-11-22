@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:46110dafa0fb4021689df2730b5b83c67ed2cb1804fa09593aa160363adb2fca */
+/* lc-kit 1 sha256:9087dc5fb8bae4c53a72cf5b1623ea6f626afa9aaebb3e1849043510080a3248 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -337,10 +337,11 @@ a.lc-site:focus-visible {
   .lc-board-links a { display: inline-block; padding: 10px 0; line-height: 20px; }
 }
 
-/* The second bar under the title bar, for a family of sites behind one switcher
-   entry (Software: U-Boot, Memory, Linux). Its label and site links are
-   written by sync.py (SUBNAV); the site's own pages sit at the far end, in
-   .lc-subnav-pages. The same voice as education's section bar. */
+/* The second bar under the title bar, for a family of sites behind one header
+   section (Hardware, Software). Its label and site links are written by
+   sync.py (SUBNAV). A site's own pages are a bar of their own under it
+   (nav.lc-subnav-local, aria-label "<site> pages"), so each bar has one
+   current item. The same voice as education's section bar. */
 .lc-subnav {
   flex: none;
   display: flex;
@@ -359,6 +360,8 @@ a.lc-site:focus-visible {
   gap: 4px 18px;
 }
 .lc-subnav-pages { margin-left: auto; }
+.lc-subnav-local { padding-top: 5px; padding-bottom: 5px; background: var(--bg-raised); }
+.lc-subnav-local .lc-subnav-pages { margin-left: 0; }
 .lc-subnav a { color: var(--text-dim); white-space: nowrap; }
 .lc-subnav a:hover { color: var(--accent); text-decoration: none; }
 .lc-subnav a[aria-current] { color: var(--text); font-weight: 600; }
