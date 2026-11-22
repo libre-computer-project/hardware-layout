@@ -20,6 +20,15 @@ import { readFile, writeFile, mkdir, readdir, rm, rmdir } from "node:fs/promises
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
+/** The kit's second row as tools/lc-ui-kit/sync.py last wrote it into this
+ *  board page (the other tools' pages for this board): kept, so a render
+ *  alone changes nothing; sync.py rewrites it when the kit moves. */
+const KIT_ROW = /[ \t]*<div class="lc-subnav-sites">[\s\S]*?<\/div>/;
+async function keepKitRow(file, html) {
+  const old = (await readFile(file, "utf8").catch(() => "")).match(KIT_ROW);
+  return old && KIT_ROW.test(html) ? html.replace(KIT_ROW, () => old[0]) : html;
+}
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const parts = await import(pathToFileURL(path.join(ROOT, "js/parts.js")).href);
 const { ORIGIN, esc, pageUrl } = parts;
@@ -65,7 +74,7 @@ for (const row of listed) {
     .replace(/(<link rel="stylesheet" href=")(css\/)/g, "$1../$2")
     .replace(/(<script type="module" src=")(js\/)/g, "$1../$2");
   await mkdir(path.join(ROOT, row.id), { recursive: true });
-  await writeFile(path.join(ROOT, row.id, "index.html"), html);
+  await writeFile(path.join(ROOT, row.id, "index.html"), await keepKitRow(path.join(ROOT, row.id, "index.html"), html));
   sitemap.push(pageUrl(row.id));
 }
 // a board that left the list (or became hidden): its page goes too (only
