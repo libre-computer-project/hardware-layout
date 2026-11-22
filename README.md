@@ -19,7 +19,11 @@ Same palette, same board vocabulary, same `?board=` permalinks.
 | <kbd>F</kbd> | Fit the board to the window |
 | <kbd>Esc</kbd> | Clear the selection and the net highlight |
 
-`?board=<id>` is a permalink to one board.
+`?board=<id>` is a permalink to one board. Each board listed by default also
+has a page of its own, `/<id>/` (e.g. `/aml-s905x-cc/`): the same viewer,
+opened on that board, with the board's connectors and main parts written into
+the HTML for readers and crawlers that run no JavaScript. A board hidden by
+default has no such page.
 
 ## Where each board's data comes from
 
@@ -50,15 +54,19 @@ the committed tree, and CI will not deploy a tree that fails it.
 
 ```
 index.html            the page
+<id>/index.html       GENERATED: one page per listed board (tools/render.mjs)
+robots.txt, sitemap.xml, llms.txt   GENERATED, by the same tool
 css/lc-kit.css        VENDORED shell: theme, top bar, footer, controls
 js/lc-kit.js          VENDORED shell: theme cycle, mountShell(), token()
 css/style.css         this tool only: copper palette, board, canvas stage
 js/app.js             the viewer: canvas render, filters, net highlight
+js/parts.js           the parts list as HTML: one renderer for the pages and the viewer
 data/boards.json      the board index the picker is built from
 data/lc-products.json VENDORED: each board's product page and 3D model, beside the picker
 data/<id>.json        outline, placement, categories, netlist   -- always fetched
 data/<id>.copper.json the eight copper layers                   -- fetched on demand
 tools/gen-layout-data.py   ODB++ export -> the two data files
+tools/render.mjs           data/ -> the board pages, robots.txt, sitemap.xml, llms.txt
 tools/check-site.py        the pre-publish gate CI runs
 tools/check-kit.py         proves the vendored shell has not been hand-edited
 ```
@@ -127,6 +135,19 @@ from a file URL.
 The site is `layout.hardware.libre.computer`, served by GitHub Pages from this
 repository's `master` and gated by `.github/workflows/pages.yml` — a failing
 `tools/check-site.py` stops the deploy rather than annotating it.
+
+**Render before publishing.** After the data or `index.html` changes, run
+
+```sh
+node tools/render.mjs      # Node 18+, no dependencies
+tools/check-site.py
+```
+
+and commit its output: `index.html` (the board list and canonical), every
+`<id>/index.html`, `robots.txt`, `sitemap.xml` and `llms.txt`. CI does not
+render; `tools/check-site.py` fails when the board pages or the sitemap no
+longer match the boards listed in `data/boards.json`. A second run changes
+nothing.
 
 **`LICENSE` is still absent and deliberate.** The code and the CAD-derived
 board data are not obviously the same licensing question, and neither is

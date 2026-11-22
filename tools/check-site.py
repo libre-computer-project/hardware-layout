@@ -17,6 +17,8 @@ Four questions, in the order in which getting one wrong costs the most:
   2. Does every file parse, and does each carry the fields the viewer reads?
   3. Does any string in the shipped data name a machine, a person or a path?
   4. Do the pages reference only files that exist?
+  5. Do the pages tools/render.mjs writes (one per board, robots.txt,
+     sitemap.xml, llms.txt) cover exactly the boards listed by default?
 
 Usage:  tools/check-site.py [--root .]      exit 0 clean, 1 with findings
 """
@@ -44,6 +46,9 @@ LEAK = re.compile(
 # Hosts the pages are allowed to link out to. A URL in the DATA is a finding
 # whatever it points at; a URL in the markup is fine if it is one of ours.
 LINK_OK = ("libre.computer", "hardware.libre.computer", "github.com/libre-computer-project")
+
+ORIGIN = "https://layout.hardware.libre.computer"
+ROBOTS = f"User-agent: *\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n"
 
 BASE_KEYS = {"id", "model", "name", "soc", "outline", "categories", "components",
              "nets", "pin_nets", "copper_index"}
@@ -150,17 +155,69 @@ def main():
             bad.append(f"data/{f.name}: not referenced by boards.json -- either "
                        f"add the board to the index or delete the file")
 
-    # 4 -- the markup's own references resolve.
-    for page in sorted(root.glob("*.html")):
+    # 4 -- the markup's own references resolve (a board's page, one level
+    # down, from its own directory).
+    pages = sorted(root.glob("*.html")) + sorted(root.glob("*/index.html"))
+    for page in pages:
         html = page.read_text()
+        name = page.relative_to(root).as_posix()
         for ref in re.findall(r'(?:src|href)="([^"#?]+)"', html):
             if ref.startswith(("http://", "https://", "data:", "mailto:", "//")):
                 if ref.startswith(("http://", "https://")) and \
                         not any(h in ref for h in LINK_OK):
-                    bad.append(f"{page.name}: links off-site to {ref}")
+                    bad.append(f"{name}: links off-site to {ref}")
                 continue
-            if not (root / ref).exists():
-                bad.append(f"{page.name}: references missing {ref}")
+            target = root / ref.lstrip("/") if ref.startswith("/") else page.parent / ref
+            if not target.exists():
+                bad.append(f"{name}: references missing {ref}")
+
+    # 5 -- what tools/render.mjs writes agrees with the index: a page, and a
+    # sitemap and llms.txt entry, for every board listed by default and for
+    # nothing else. A page for a hidden board would publish, to every crawler,
+    # a board the picker shows only under the switch.
+    hidden_ids = [b["id"] for b in index if b["hidden"]]
+    listed_ids = [b["id"] for b in index if not b["hidden"]]
+    word = lambda i: re.compile(rf"(?<![\w-]){re.escape(i)}(?![\w-])")
+    for d in sorted(p for p in root.iterdir() if p.is_dir() and (p / "index.html").exists()):
+        if d.name not in listed_ids:
+            bad.append(f"{d.name}/index.html: a page for a board not listed by default "
+                       f"-- re-run node tools/render.mjs")
+    for i in listed_ids:
+        page = root / i / "index.html"
+        if not page.exists():
+            bad.append(f"{i}: no {i}/index.html -- run node tools/render.mjs and commit it")
+            continue
+        html = page.read_text()
+        if f'<body data-board="{i}">' not in html:
+            bad.append(f"{i}/index.html: its <body> does not carry data-board=\"{i}\"")
+        if f'<link rel="canonical" href="{ORIGIN}/{i}/">' not in html:
+            bad.append(f"{i}/index.html: no canonical {ORIGIN}/{i}/")
+        if '<div id="parts-text"><details' not in html:
+            bad.append(f"{i}/index.html: no parts list in #parts-text")
+    home = (root / "index.html").read_text() if (root / "index.html").exists() else ""
+    if f'<link rel="canonical" href="{ORIGIN}/">' not in home:
+        bad.append(f"index.html: no canonical {ORIGIN}/")
+    robots = root / "robots.txt"
+    if not robots.exists() or robots.read_text() != ROBOTS:
+        bad.append("robots.txt: missing or not the standard text -- run node tools/render.mjs")
+    sm = root / "sitemap.xml"
+    if sm.exists():
+        locs = re.findall(r"<loc>([^<]*)</loc>", sm.read_text())
+        want = [f"{ORIGIN}/"] + [f"{ORIGIN}/{i}/" for i in listed_ids]
+        if locs != want:
+            bad.append("sitemap.xml: does not list exactly the home page and every listed "
+                       "board's page -- run node tools/render.mjs")
+    else:
+        bad.append("sitemap.xml is missing -- run node tools/render.mjs")
+    if not (root / "llms.txt").exists():
+        bad.append("llms.txt is missing -- run node tools/render.mjs")
+    for f in [root / "sitemap.xml", root / "llms.txt", *pages]:
+        if not f.exists():
+            continue
+        text = f.read_text()
+        for i in hidden_ids:
+            if word(i).search(text):
+                bad.append(f"{f.relative_to(root).as_posix()}: names a board hidden by default")
 
     listed = sum(1 for b in index if not b["hidden"])
     if bad:
@@ -172,7 +229,8 @@ def main():
     # This line lands in the public Actions log, so it counts the unlisted
     # boards without naming the switch that reveals them.
     print(f"OK  {len(index)} boards ({listed} listed, {len(index) - listed} "
-          f"unlisted), every data file indexed, no path-like values")
+          f"unlisted), every data file indexed, no path-like values, "
+          f"{len(listed_ids)} board pages and the sitemap match the listed boards")
     return 0
 
 

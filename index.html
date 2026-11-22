@@ -10,6 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Libre Computer Board Layout</title>
 <meta name="description" content="Interactive PCB placement and routing viewer for Libre Computer single-board computers — every part, footprint, net and copper layer, read from the boards' own CAD data.">
+<link rel="canonical" href="https://layout.hardware.libre.computer/">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/lc-kit.css">
 <link rel="stylesheet" href="css/style.css">
@@ -61,6 +62,11 @@
     <div id="comp-list" role="listbox" tabindex="0" aria-label="Placed parts"></div>
     <div id="detail"></div>
     <p id="announce" class="lc-vh" role="status"></p>
+
+    <!-- The parts list as plain HTML, drawn in by tools/render.mjs (and
+         redrawn by js/app.js on a change of board): js/parts.js -->
+    <h3>Parts list</h3>
+    <div id="parts-text"><details class="parts-text"><summary>Boards</summary><ul><li><a href="aml-s905x-cc/">Le Potato (AML-S905X-CC)</a> S905X, 84 × 56 mm</li><li><a href="aml-s905x-cc-v2/">Sweet Potato (AML-S905X-CC-V2)</a> S905X, 85 × 56 mm</li><li><a href="aml-s805x-ac/">La Frite (AML-S805X-AC)</a> S805X, 56 × 65 mm</li><li><a href="aml-s805x-ac-v2/">Das Frite (AML-S805X-AC-V2)</a> S805X, 56 × 65 mm</li><li><a href="aml-a311d-cc/">Alta (AML-A311D-CC)</a> A311D, 85 × 56 mm</li><li><a href="aml-s905d3-cc/">Solitude (AML-S905D3-CC)</a> S905D3, 85 × 56 mm</li><li><a href="roc-rk3328-cc/">Renegade (ROC-RK3328-CC)</a> RK3328, 85 × 56 mm</li><li><a href="all-h3-cc/">Tritium (ALL-H3-CC)</a> H2+/H3/H5, 84 × 56 mm</li></ul></details></div><!-- /parts -->
   </aside>
 
   <!-- Focusable so the keys pan and zoom it; the parts themselves are picked

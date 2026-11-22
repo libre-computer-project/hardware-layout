@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Scripts from this site only, plus the inline theme snippet by its sha256
+     (tools/check-kit.py recomputes it); data, styles and images same-origin,
+     data: for the kit's logo. GitHub Pages sets no headers, so it is a meta. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oHIc59mqgn9ICn5smlJlKAoSorMm9lRvLXPlZJXSqW8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solitude (AML-S905D3-CC) Board Layout — Libre Computer</title>
+<meta name="description" content="Solitude (AML-S905D3-CC) PCB layout, 85 × 56 mm: its connectors and main parts by reference designator, and an interactive viewer of every part&#39;s placement and copper routing, read from the board&#39;s own CAD data.">
+<link rel="canonical" href="https://layout.hardware.libre.computer/aml-s905d3-cc/">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../css/lc-kit.css">
+<link rel="stylesheet" href="../css/style.css">
+<!-- Sets the theme before first paint, so a dark visitor never sees a white
+     flash. Must stay inline and must stay ahead of the stylesheets; the copy
+     is checked by tools/lc-ui-kit/sync.py against HEAD_SNIPPET in lc-kit.js. -->
+<script>try{var q=new URLSearchParams(location.search),e=q.get("embed")==="1",t=e&&q.get("theme");if(e)document.documentElement.classList.add("lc-embed");var p=t==="light"||t==="dark"?t:localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(x){}</script>
+</head>
+<body data-board="aml-s905d3-cc">
+<a class="lc-skip" href="#main">Skip to content</a>
+
+<header class="lc-topbar">
+  <div class="lc-brand">
+    <a class="lc-brand-name" href="https://libre.computer">Libre Computer</a>
+    <nav class="lc-sites" aria-label="Libre Computer sites">
+      <a class="lc-site" href="https://education.libre.computer/">Education</a>
+      <a class="lc-site" href="/" aria-current="true">Layout</a>
+      <a class="lc-site" data-lc-site href="https://gpio.hardware.libre.computer/">GPIO Pinout</a>
+      <a class="lc-site" data-lc-site href="https://power.hardware.libre.computer/">Power</a>
+      <a class="lc-site" href="https://u-boot.software.libre.computer/">Software</a>
+    </nav>
+  </div>
+  <div class="lc-controls">
+    <label for="board-select">Board</label>
+    <select id="board-select" aria-label="Select board"></select>
+    <input id="search" type="search" placeholder="Search: U1, 7J1, LPDDR4…" autocomplete="off" spellcheck="false" aria-label="Search by reference designator or footprint">
+  </div>
+</header>
+
+<div class="lc-notices" id="notices"></div>
+
+<main class="lc-main" id="main">
+  <h1 class="lc-vh">Solitude (AML-S905D3-CC) board layout</h1>
+  <aside class="lc-panel" id="sidebar">
+    <h3>Board</h3>
+    <div id="board-meta"></div>
+
+    <h3>Side</h3>
+    <div class="lc-seg" id="side-seg" role="group" aria-label="Board side"></div>
+
+    <h3>Copper layers</h3>
+    <div id="copper-toggles"></div>
+    <p id="copper-note"></p>
+
+    <h3>Part classes</h3>
+    <div id="cat-toggles"></div>
+
+    <h3>Parts</h3>
+    <div id="comp-list" role="listbox" tabindex="0" aria-label="Placed parts"></div>
+    <div id="detail"></div>
+    <p id="announce" class="lc-vh" role="status"></p>
+
+    <!-- The parts list as plain HTML, drawn in by tools/render.mjs (and
+         redrawn by js/app.js on a change of board): js/parts.js -->
+    <h3>Parts list</h3>
+    <div id="parts-text"><details class="parts-text"><summary>Solitude (AML-S905D3-CC): connectors and main parts</summary><p>Solitude (AML-S905D3-CC): revision V1.0C, S905D3 SoC, 85 × 56 mm, 8 copper layers, 679 placed parts, 508 nets.</p><table class="lc-table parts-table"><caption>Connectors (13)</caption><thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Side</th></tr></thead><tbody><tr><th scope="row">1J1</th><td><span class="fp">TYPE-C_SOCKET_16, 22 pins</span></td><td>Top</td></tr><tr><th scope="row">2J1</th><td><span class="fp">CON3-2.54MM, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">4J1</th><td><span class="fp">CON_30PIN_0D4_SMT, 34 pins</span></td><td>Bottom</td></tr><tr><th scope="row">5J1</th><td><span class="fp">CON4_1, 4 pins</span></td><td>Top</td></tr><tr><th scope="row">5J2</th><td><span class="fp">RJ45_P_2, 22 pins</span></td><td>Top</td></tr><tr><th scope="row">6J1</th><td><span class="fp">TF-CARD-SMALL, 16 pins</span></td><td>Bottom</td></tr><tr><th scope="row">6J3</th><td><span class="fp">USB3.0_D_1, 22 pins</span></td><td>Top</td></tr><tr><th scope="row">6J5</th><td><span class="fp">USB3.0_D_1, 22 pins</span></td><td>Top</td></tr><tr><th scope="row">7J2</th><td><span class="fp">CON40-2X20-2.54MM-DIP, 40 pins</span></td><td>Top</td></tr><tr><th scope="row">8J1</th><td><span class="fp">CON22C_0, 24 pins</span></td><td>Top</td></tr><tr><th scope="row">8J2</th><td><span class="fp">CON22C_0, 24 pins</span></td><td>Top</td></tr><tr><th scope="row">9J1</th><td><span class="fp">J-HDMI-TYPE-A-19P_0, 23 pins</span></td><td>Top</td></tr><tr><th scope="row">10J1</th><td><span class="fp">PJ-322, 7 pins</span></td><td>Top</td></tr></tbody></table><table class="lc-table parts-table"><caption>ICs (23)</caption><thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Side</th></tr></thead><tbody><tr><th scope="row">1U1</th><td><span class="fp">TPS56528DDA, 9 pins</span></td><td>Bottom</td></tr><tr><th scope="row">1U2</th><td>LDO · WL2803E25-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Bottom</td></tr><tr><th scope="row">1U3</th><td><span class="fp">MP1495_0, 12 pins</span></td><td>Top</td></tr><tr><th scope="row">1U4</th><td>LDO · WL2803E25-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Bottom</td></tr><tr><th scope="row">1U5</th><td>LDO · WL2803E25-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Bottom</td></tr><tr><th scope="row">1U6</th><td><span class="fp">MP1495_0, 12 pins</span></td><td>Top</td></tr><tr><th scope="row">1U7</th><td>LDO · WL2803E25-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">1U8</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">1U11</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">1U12</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Bottom</td></tr><tr><th scope="row">2U1</th><td>LMV331ICT<br><span class="fp">LMV331, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">2U2</th><td>MAX809RD/RS809R<br><span class="fp">MAX809RD, 3 pins</span></td><td>Bottom</td></tr><tr><th scope="row">2U3</th><td>Infrared Remote-control receiver · IRM-3638N3<br><span class="fp">IR_1, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">2U4</th><td>TL431AIDBZR<br><span class="fp">TL431_2, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">4U1</th><td><span class="fp">NOR_FLASH_1, 9 pins</span></td><td>Top</td></tr><tr><th scope="row">4U2</th><td>GD25LQ128DSEGR<br><span class="fp">NOR_FLASH, 8 pins</span></td><td>Top</td></tr><tr><th scope="row">5U1</th><td><span class="fp">RTL8211F_FD_FI_FDI, 41 pins</span></td><td>Top</td></tr><tr><th scope="row">6U1</th><td><span class="fp">GL3510_QFN64, 65 pins</span></td><td>Top</td></tr><tr><th scope="row">6U2</th><td><span class="fp">FLASH_1, 8 pins</span></td><td>Top</td></tr><tr><th scope="row">10U2</th><td><span class="fp">DIO2103CT14, 14 pins</span></td><td>Bottom</td></tr><tr><th scope="row">10U3</th><td>MP8756GD<br><span class="fp">MP1495_1, 5 pins</span></td><td>Bottom</td></tr><tr><th scope="row">U1</th><td>S905D2<br><span class="fp">G12A_16X14_3MM_20180105, 454 pins</span></td><td>Top</td></tr><tr><th scope="row">U4</th><td>LPDDR4_MO_311-200<br><span class="fp">LPDDR4_MO_1, 200 pins</span></td><td>Top</td></tr></tbody></table></details></div><!-- /parts -->
+  </aside>
+
+  <!-- Focusable so the keys pan and zoom it; the parts themselves are picked
+       from the Parts list, which is the drawing's keyboard route -->
+  <div id="stage" tabindex="0" role="region" aria-label="Board drawing" aria-describedby="keys">
+    <canvas id="canvas" aria-hidden="true"></canvas>
+    <div id="tooltip" class="lc-tooltip" hidden></div>
+    <div id="hud"></div>
+    <!-- The copper and net parts are filled in per board: the layer count
+         differs (6 or 8), and the board imported from a mechanical model has
+         neither, where this used to promise both and contradict the sidebar's
+         own "This export carries no copper layers". -->
+    <div id="keys"></div>
+    <div id="spinner" hidden>Loading…</div>
+  </div>
+</main>
+
+<footer class="lc-footer">
+  Read from each board's own CAD data — ODB++ where there is an export,
+  the published mechanical model otherwise ·
+  Learn how it works: <a href="https://education.libre.computer/modules/what-a-board-is/">what a board is</a> ·
+  <a href="https://libre.computer">libre.computer</a>
+</footer>
+
+<script type="module" src="../js/app.js"></script>
+</body>
+</html>

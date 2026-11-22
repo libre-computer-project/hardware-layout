@@ -1,0 +1,16 @@
+# Libre Computer Board Layout
+
+> Interactive PCB placement and routing viewer for Libre Computer single-board computers — every part, footprint, net and copper layer, read from the boards' own CAD data.
+
+Part of Libre Computer (https://libre.computer/llms.txt). Each board's page carries its connectors and main parts as HTML.
+
+## Boards
+
+- [Le Potato (AML-S905X-CC)](https://layout.hardware.libre.computer/aml-s905x-cc/)
+- [Sweet Potato (AML-S905X-CC-V2)](https://layout.hardware.libre.computer/aml-s905x-cc-v2/)
+- [La Frite (AML-S805X-AC)](https://layout.hardware.libre.computer/aml-s805x-ac/)
+- [Das Frite (AML-S805X-AC-V2)](https://layout.hardware.libre.computer/aml-s805x-ac-v2/)
+- [Alta (AML-A311D-CC)](https://layout.hardware.libre.computer/aml-a311d-cc/)
+- [Solitude (AML-S905D3-CC)](https://layout.hardware.libre.computer/aml-s905d3-cc/)
+- [Renegade (ROC-RK3328-CC)](https://layout.hardware.libre.computer/roc-rk3328-cc/)
+- [Tritium (ALL-H3-CC)](https://layout.hardware.libre.computer/all-h3-cc/)

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Scripts from this site only, plus the inline theme snippet by its sha256
+     (tools/check-kit.py recomputes it); data, styles and images same-origin,
+     data: for the kit's logo. GitHub Pages sets no headers, so it is a meta. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oHIc59mqgn9ICn5smlJlKAoSorMm9lRvLXPlZJXSqW8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sweet Potato (AML-S905X-CC-V2) Board Layout — Libre Computer</title>
+<meta name="description" content="Sweet Potato (AML-S905X-CC-V2) PCB layout, 85 × 56 mm: its connectors and main parts by reference designator, and an interactive viewer of every part&#39;s placement and copper routing, read from the board&#39;s own CAD data.">
+<link rel="canonical" href="https://layout.hardware.libre.computer/aml-s905x-cc-v2/">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../css/lc-kit.css">
+<link rel="stylesheet" href="../css/style.css">
+<!-- Sets the theme before first paint, so a dark visitor never sees a white
+     flash. Must stay inline and must stay ahead of the stylesheets; the copy
+     is checked by tools/lc-ui-kit/sync.py against HEAD_SNIPPET in lc-kit.js. -->
+<script>try{var q=new URLSearchParams(location.search),e=q.get("embed")==="1",t=e&&q.get("theme");if(e)document.documentElement.classList.add("lc-embed");var p=t==="light"||t==="dark"?t:localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(x){}</script>
+</head>
+<body data-board="aml-s905x-cc-v2">
+<a class="lc-skip" href="#main">Skip to content</a>
+
+<header class="lc-topbar">
+  <div class="lc-brand">
+    <a class="lc-brand-name" href="https://libre.computer">Libre Computer</a>
+    <nav class="lc-sites" aria-label="Libre Computer sites">
+      <a class="lc-site" href="https://education.libre.computer/">Education</a>
+      <a class="lc-site" href="/" aria-current="true">Layout</a>
+      <a class="lc-site" data-lc-site href="https://gpio.hardware.libre.computer/">GPIO Pinout</a>
+      <a class="lc-site" data-lc-site href="https://power.hardware.libre.computer/">Power</a>
+      <a class="lc-site" href="https://u-boot.software.libre.computer/">Software</a>
+    </nav>
+  </div>
+  <div class="lc-controls">
+    <label for="board-select">Board</label>
+    <select id="board-select" aria-label="Select board"></select>
+    <input id="search" type="search" placeholder="Search: U1, 7J1, LPDDR4…" autocomplete="off" spellcheck="false" aria-label="Search by reference designator or footprint">
+  </div>
+</header>
+
+<div class="lc-notices" id="notices"></div>
+
+<main class="lc-main" id="main">
+  <h1 class="lc-vh">Sweet Potato (AML-S905X-CC-V2) board layout</h1>
+  <aside class="lc-panel" id="sidebar">
+    <h3>Board</h3>
+    <div id="board-meta"></div>
+
+    <h3>Side</h3>
+    <div class="lc-seg" id="side-seg" role="group" aria-label="Board side"></div>
+
+    <h3>Copper layers</h3>
+    <div id="copper-toggles"></div>
+    <p id="copper-note"></p>
+
+    <h3>Part classes</h3>
+    <div id="cat-toggles"></div>
+
+    <h3>Parts</h3>
+    <div id="comp-list" role="listbox" tabindex="0" aria-label="Placed parts"></div>
+    <div id="detail"></div>
+    <p id="announce" class="lc-vh" role="status"></p>
+
+    <!-- The parts list as plain HTML, drawn in by tools/render.mjs (and
+         redrawn by js/app.js on a change of board): js/parts.js -->
+    <h3>Parts list</h3>
+    <div id="parts-text"><details class="parts-text"><summary>Sweet Potato (AML-S905X-CC-V2): connectors and main parts</summary><p>Sweet Potato (AML-S905X-CC-V2): revision V2.0-C, S905X SoC, 85 × 56 mm, 6 copper layers, 397 placed parts, 304 nets.</p><table class="lc-table parts-table"><caption>Connectors (14)</caption><thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Side</th></tr></thead><tbody><tr><th scope="row">1J1</th><td><span class="fp">TYPE-C_SOCKET_16, 22 pins</span></td><td>Top</td></tr><tr><th scope="row">2J1</th><td>3P-2.54MM<br><span class="fp">CON3-2.54MM, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">2J3</th><td>8P-2.54MM<br><span class="fp">CON8-2.54MM, 8 pins</span></td><td>Top</td></tr><tr><th scope="row">4J1</th><td>ASE5S3010<br><span class="fp">CON_30PIN_0D4_SMT, 34 pins</span></td><td>Bottom</td></tr><tr><th scope="row">5J1</th><td>HR871156C<br><span class="fp">RJ45-POE-HR871156C, 18 pins</span></td><td>Top</td></tr><tr><th scope="row">5J2</th><td>4P-2X2-2.54MM<br><span class="fp">CON4-2X2-2.54MM-DIP, 4 pins</span></td><td>Top</td></tr><tr><th scope="row">6J1</th><td>TFWF1-EBF1-1X0X<br><span class="fp">J-TF-CARD-PUSH, 15 pins</span></td><td>Bottom</td></tr><tr><th scope="row">6J2</th><td>317AE-04-PSD-1001<br><span class="fp">J-USB-A_DUAL, 12 pins</span></td><td>Top</td></tr><tr><th scope="row">6J3</th><td>317AE-04-PSD-1001<br><span class="fp">J-USB-A_DUAL, 12 pins</span></td><td>Top</td></tr><tr><th scope="row">7J1</th><td>40P-2X20-2.54MM<br><span class="fp">CON40-2X20-2.54MM-DIP, 40 pins</span></td><td>Top</td></tr><tr><th scope="row">7J2</th><td>5P-2.54MM<br><span class="fp">CON5-2.54MM, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">9J1</th><td>HDA31-F1F1-1000-A<br><span class="fp">J-HDMI-TYPE-A-19P_0, 23 pins</span></td><td>Top</td></tr><tr><th scope="row">9J2</th><td>3P-2.54MM<br><span class="fp">CON3-2.54MM, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">9J3</th><td>3P-2.54MM<br><span class="fp">CON3-2.54MM, 3 pins</span></td><td>Top</td></tr></tbody></table><table class="lc-table parts-table"><caption>ICs (18)</caption><thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Side</th></tr></thead><tbody><tr><th scope="row">1U1</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">1U2</th><td>LDO · WL2803E18-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">1U3</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">1U4</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">1U5</th><td>LMV331ICT<br><span class="fp">LMV331, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">1U6</th><td>IC DC-DC · SY8120B1ABC<br><span class="fp">SY81XX, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">1U7</th><td>LDO · WL2803E18-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">1U8</th><td>TL431AIDBZR<br><span class="fp">TL431_2, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">2U2</th><td>SGM809-RXN3L/TR<br><span class="fp">MAX809RD, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">2U3</th><td>Infrared Remote-control receiver · IRM-56384<br><span class="fp">IR_1, 3 pins</span></td><td>Top</td></tr><tr><th scope="row">3U2</th><td>LDO · WL2803E25-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Bottom</td></tr><tr><th scope="row">3U4</th><td>DDR4  H5AN8G6NAFR-UHC<br><span class="fp">DDR4_96P_16B, 96 pins</span></td><td>Top</td></tr><tr><th scope="row">3U5</th><td>DDR4  H5AN8G6NAFR-UHC<br><span class="fp">DDR4_96P_16B, 96 pins</span></td><td>Top</td></tr><tr><th scope="row">4U1</th><td>GD25LQ128DWIG<br><span class="fp">NOR_FLASH_1, 9 pins</span></td><td>Top</td></tr><tr><th scope="row">5U2</th><td>AZC199-04S<br><span class="fp">AZ1213-04S, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">6U1</th><td>GL852G-60<br><span class="fp">GL852G, 29 pins</span></td><td>Top</td></tr><tr><th scope="row">6U2</th><td>LDO · WL2803E18-5<br><span class="fp">WL2003E, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">U1</th><td>GXL_S905X<br><span class="fp">GXL_S905X-161130, 368 pins</span></td><td>Top</td></tr></tbody></table></details></div><!-- /parts -->
+  </aside>
+
+  <!-- Focusable so the keys pan and zoom it; the parts themselves are picked
+       from the Parts list, which is the drawing's keyboard route -->
+  <div id="stage" tabindex="0" role="region" aria-label="Board drawing" aria-describedby="keys">
+    <canvas id="canvas" aria-hidden="true"></canvas>
+    <div id="tooltip" class="lc-tooltip" hidden></div>
+    <div id="hud"></div>
+    <!-- The copper and net parts are filled in per board: the layer count
+         differs (6 or 8), and the board imported from a mechanical model has
+         neither, where this used to promise both and contradict the sidebar's
+         own "This export carries no copper layers". -->
+    <div id="keys"></div>
+    <div id="spinner" hidden>Loading…</div>
+  </div>
+</main>
+
+<footer class="lc-footer">
+  Read from each board's own CAD data — ODB++ where there is an export,
+  the published mechanical model otherwise ·
+  Learn how it works: <a href="https://education.libre.computer/modules/what-a-board-is/">what a board is</a> ·
+  <a href="https://libre.computer">libre.computer</a>
+</footer>
+
+<script type="module" src="../js/app.js"></script>
+</body>
+</html>

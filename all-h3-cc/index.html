@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Scripts from this site only, plus the inline theme snippet by its sha256
+     (tools/check-kit.py recomputes it); data, styles and images same-origin,
+     data: for the kit's logo. GitHub Pages sets no headers, so it is a meta. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oHIc59mqgn9ICn5smlJlKAoSorMm9lRvLXPlZJXSqW8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tritium (ALL-H3-CC) Board Layout — Libre Computer</title>
+<meta name="description" content="Tritium (ALL-H3-CC) PCB layout, 84 × 56 mm: its connectors and main parts by reference designator, and an interactive viewer of every part&#39;s placement, read from the board&#39;s own CAD data.">
+<link rel="canonical" href="https://layout.hardware.libre.computer/all-h3-cc/">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../css/lc-kit.css">
+<link rel="stylesheet" href="../css/style.css">
+<!-- Sets the theme before first paint, so a dark visitor never sees a white
+     flash. Must stay inline and must stay ahead of the stylesheets; the copy
+     is checked by tools/lc-ui-kit/sync.py against HEAD_SNIPPET in lc-kit.js. -->
+<script>try{var q=new URLSearchParams(location.search),e=q.get("embed")==="1",t=e&&q.get("theme");if(e)document.documentElement.classList.add("lc-embed");var p=t==="light"||t==="dark"?t:localStorage.getItem("theme")||"auto";if(p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(x){}</script>
+</head>
+<body data-board="all-h3-cc">
+<a class="lc-skip" href="#main">Skip to content</a>
+
+<header class="lc-topbar">
+  <div class="lc-brand">
+    <a class="lc-brand-name" href="https://libre.computer">Libre Computer</a>
+    <nav class="lc-sites" aria-label="Libre Computer sites">
+      <a class="lc-site" href="https://education.libre.computer/">Education</a>
+      <a class="lc-site" href="/" aria-current="true">Layout</a>
+      <a class="lc-site" data-lc-site href="https://gpio.hardware.libre.computer/">GPIO Pinout</a>
+      <a class="lc-site" data-lc-site href="https://power.hardware.libre.computer/">Power</a>
+      <a class="lc-site" href="https://u-boot.software.libre.computer/">Software</a>
+    </nav>
+  </div>
+  <div class="lc-controls">
+    <label for="board-select">Board</label>
+    <select id="board-select" aria-label="Select board"></select>
+    <input id="search" type="search" placeholder="Search: U1, 7J1, LPDDR4…" autocomplete="off" spellcheck="false" aria-label="Search by reference designator or footprint">
+  </div>
+</header>
+
+<div class="lc-notices" id="notices"></div>
+
+<main class="lc-main" id="main">
+  <h1 class="lc-vh">Tritium (ALL-H3-CC) board layout</h1>
+  <aside class="lc-panel" id="sidebar">
+    <h3>Board</h3>
+    <div id="board-meta"></div>
+
+    <h3>Side</h3>
+    <div class="lc-seg" id="side-seg" role="group" aria-label="Board side"></div>
+
+    <h3>Copper layers</h3>
+    <div id="copper-toggles"></div>
+    <p id="copper-note"></p>
+
+    <h3>Part classes</h3>
+    <div id="cat-toggles"></div>
+
+    <h3>Parts</h3>
+    <div id="comp-list" role="listbox" tabindex="0" aria-label="Placed parts"></div>
+    <div id="detail"></div>
+    <p id="announce" class="lc-vh" role="status"></p>
+
+    <!-- The parts list as plain HTML, drawn in by tools/render.mjs (and
+         redrawn by js/app.js on a change of board): js/parts.js -->
+    <h3>Parts list</h3>
+    <div id="parts-text"><details class="parts-text"><summary>Tritium (ALL-H3-CC): connectors and main parts</summary><p>Tritium (ALL-H3-CC): revision V1.1, H2+/H3/H5 SoC, 84 × 56 mm, no copper layers in this export, 309 placed parts.</p><table class="lc-table parts-table"><caption>Connectors (10)</caption><thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Side</th></tr></thead><tbody><tr><th scope="row">2J2</th><td><span class="fp">CN-2P54-2P, 2 pins</span></td><td>Top</td></tr><tr><th scope="row">4CON1</th><td><span class="fp">30P-0.4MM-M, 30 pins</span></td><td>Bottom</td></tr><tr><th scope="row">6CON1</th><td><span class="fp">USB-MICRO-DIP, 11 pins</span></td><td>Top</td></tr><tr><th scope="row">6J2</th><td><span class="fp">GXK-12USB, 12 pins</span></td><td>Top</td></tr><tr><th scope="row">6J3</th><td><span class="fp">GXK-12USB, 12 pins</span></td><td>Top</td></tr><tr><th scope="row">7J1</th><td><span class="fp">CN-2P00-2X20P, 40 pins</span></td><td>Top</td></tr><tr><th scope="row">CON2</th><td><span class="fp">FPC24PIN_0_5MM_TOP, 26 pins</span></td><td>Top</td></tr><tr><th scope="row">CON11</th><td><span class="fp">TFCARD, 15 pins</span></td><td>Bottom</td></tr><tr><th scope="row">J8</th><td><span class="fp">RJ-45B, 16 pins</span></td><td>Top</td></tr><tr><th scope="row">J21</th><td><span class="fp">CN-2P54-3P, 3 pins</span></td><td>Top</td></tr></tbody></table><table class="lc-table parts-table"><caption>ICs (9)</caption><thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Side</th></tr></thead><tbody><tr><th scope="row">1U5</th><td><span class="fp">SOT23-5, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">U1</th><td><span class="fp">BGA347P0_65B14X14, 347 pins</span></td><td>Top</td></tr><tr><th scope="row">U4</th><td><span class="fp">SOT23-5, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">U5</th><td><span class="fp">SOT23-5, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">U6</th><td><span class="fp">SOT23-6, 6 pins</span></td><td>Top</td></tr><tr><th scope="row">U7</th><td><span class="fp">SOT23-5, 5 pins</span></td><td>Top</td></tr><tr><th scope="row">U27</th><td><span class="fp">RCLAMP0524P, 10 pins</span></td><td>Top</td></tr><tr><th scope="row">U28</th><td><span class="fp">RCLAMP0524P, 10 pins</span></td><td>Top</td></tr><tr><th scope="row">U57</th><td><span class="fp">DIP-IR, 3 pins</span></td><td>Top</td></tr></tbody></table></details></div><!-- /parts -->
+  </aside>
+
+  <!-- Focusable so the keys pan and zoom it; the parts themselves are picked
+       from the Parts list, which is the drawing's keyboard route -->
+  <div id="stage" tabindex="0" role="region" aria-label="Board drawing" aria-describedby="keys">
+    <canvas id="canvas" aria-hidden="true"></canvas>
+    <div id="tooltip" class="lc-tooltip" hidden></div>
+    <div id="hud"></div>
+    <!-- The copper and net parts are filled in per board: the layer count
+         differs (6 or 8), and the board imported from a mechanical model has
+         neither, where this used to promise both and contradict the sidebar's
+         own "This export carries no copper layers". -->
+    <div id="keys"></div>
+    <div id="spinner" hidden>Loading…</div>
+  </div>
+</main>
+
+<footer class="lc-footer">
+  Read from each board's own CAD data — ODB++ where there is an export,
+  the published mechanical model otherwise ·
+  Learn how it works: <a href="https://education.libre.computer/modules/what-a-board-is/">what a board is</a> ·
+  <a href="https://libre.computer">libre.computer</a>
+</footer>
+
+<script type="module" src="../js/app.js"></script>
+</body>
+</html>

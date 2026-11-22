@@ -160,6 +160,17 @@ body { overflow: hidden; }
   overflow-wrap: anywhere;
 }
 
+/* The parts list as plain HTML (js/parts.js): a closed disclosure at the foot
+   of the sidebar, so the viewer above it is unchanged */
+.parts-text { font-size: 12px; }
+.parts-text summary { cursor: pointer; }
+.parts-text p { margin: 6px 0; color: var(--text-dim); }
+.parts-text ul { margin: 6px 0; padding-left: 18px; }
+.parts-table { font-size: 12px; margin-top: 8px; }
+.parts-table th, .parts-table td { padding: 3px 4px; }
+.parts-table tbody th { font-family: var(--mono); }
+.parts-table .fp { color: var(--text-dim); font-family: var(--mono); overflow-wrap: anywhere; }
+
 /* ---- canvas stage ---- */
 
 #stage {

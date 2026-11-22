@@ -10,6 +10,28 @@
 "use strict";
 
 import { boardNotice, mountShell, noteAsked, resolveBoard, setBoardLinks, showHiddenFlag, token } from "./lc-kit.js";
+import { partsHtml } from "./parts.js";
+
+/* The site's root, from this module's own address: the home page is at the
+   root, a board's own page (<id>/index.html, written by tools/render.mjs) one
+   level down, and the data is fetched from the same place for both. */
+const SITE = new URL("../", import.meta.url);
+const dataUrl = (file) => new URL(`data/${file}`, SITE).href;
+
+/* The board a board's own page is for (its body's data-board); null on the
+   home page. */
+const pageBoard = () => document.body?.dataset.board || null;
+
+/* lc-kit.js fetches "data/lc-products.json" relative to the PAGE, which on a
+   board's own page is <id>/data/... and a 404, so the board's product links
+   would vanish there. The kit is vendored and may not be edited here (the fix
+   belongs upstream, in the kit); until it resolves its own path, a board page
+   points that one address at the site's data/. */
+if (pageBoard()) {
+  const fetchPage = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = (url, opts) =>
+    fetchPage(url === "data/lc-products.json" ? dataUrl("lc-products.json") : url, opts);
+}
 
 /* Category display names, and the order the sidebar lists them in. The order
    is by how much of the board the class explains, not alphabetical: someone
@@ -60,6 +82,7 @@ const els = {
   tooltip: $("tooltip"),
   hud: $("hud"),
   spinner: $("spinner"),
+  partsText: $("parts-text"),
 };
 
 /* Not const: the copper cache below renders the same drawing code into an
@@ -101,7 +124,7 @@ async function init() {
   mountShell();
   let index;
   try {
-    index = await getJSON("data/boards.json");
+    index = await getJSON(dataUrl("boards.json"));
   } catch (e) {
     notice("Could not load the board index. If you are opening this from a " +
            "file:// path, serve the directory over HTTP instead — ", "error",
@@ -116,8 +139,9 @@ async function init() {
   buildSelect();
   markHiddenMode();
 
-  // the board asked for here, else the one the previous tool was asked for
-  const wanted = params.get("asked") || params.get("board");
+  // the board asked for here, else the one the previous tool was asked for,
+  // else the board this page is for
+  const wanted = params.get("asked") || params.get("board") || pageBoard();
   const { id: found, how } = resolveBoard(wanted, visibleBoards.map((b) => b.id));
   const start = visibleBoards.find((b) => b.id === found) ||
                 visibleBoards.find((b) => b.id === "aml-a311d-cc") ||
@@ -193,7 +217,7 @@ async function loadBoard(id) {
   meta = boardIndex.find((b) => b.id === id) || null;
   spin(true);
   try {
-    board = await getJSON(`data/${id}.json`);
+    board = await getJSON(dataUrl(`${id}.json`));
   } catch (e) {
     spin(false);
     notice(`Could not load ${id}: ${e.message}`, "error");
@@ -224,6 +248,10 @@ async function loadBoard(id) {
   showDetail();
 
   renderMeta();
+  /* The plain-HTML parts list follows the board shown. A board's own page
+     already carries its board's list (tools/render.mjs drew it, from the same
+     function), so it is redrawn only when another board is shown. */
+  if (els.partsText && id !== pageBoard()) els.partsText.innerHTML = partsHtml(board);
   buildSideSeg();
   buildCopperToggles();
   buildCatToggles();
@@ -251,7 +279,7 @@ async function ensureCopper() {
   if (!board.copper_file) return null;
   if (!copperReq) {
     spin(true, "Loading copper layers…");
-    copperReq = getJSON(`data/${board.copper_file}`)
+    copperReq = getJSON(dataUrl(board.copper_file))
       .then((c) => { copper = c; return c; })
       .catch((e) => {
         notice(`Could not load the copper layers: ${e.message}`, "error");
@@ -287,10 +315,28 @@ function renderMeta() {
     const other = boardIndex.find((b) => b.id === meta.shares_layout_with);
     if (other && (showHidden || !other.hidden)) {
       html += `<br><span class="status">same PCB as ` +
-        `<a href="?board=${encodeURIComponent(other.id)}${showHidden ? "&amp;hidden=1" : ""}">${esc(other.model)}</a></span>`;
+        `<a href="${esc(boardHref(other.id))}">${esc(other.model)}</a></span>`;
     }
   }
   els.meta.innerHTML = html;
+}
+
+/* Where another board is opened from here. On the home page that is the same
+   page with ?board= (?hidden=1 kept). On a board's own page it is that board's
+   own page, ../<id>/, with this address's other parameters (?embed=, ?theme=,
+   ?hidden=) and without board/asked -- unless the board has no page (a hidden
+   one: render.mjs writes pages only for the boards listed by default), which
+   opens on the home page with ?board= as before. */
+function boardHref(id) {
+  if (!pageBoard()) return `?board=${encodeURIComponent(id)}${showHidden ? "&hidden=1" : ""}`;
+  const row = boardIndex.find((b) => b.id === id);
+  const paged = row && !row.hidden;
+  const url = new URL(paged ? `../${encodeURIComponent(id)}/` : "../", location.href);
+  url.search = location.search;
+  url.searchParams.delete("board");
+  url.searchParams.delete("asked");
+  if (!paged) url.searchParams.set("board", id);
+  return url.href;
 }
 
 /* The sidebar's button groups are rebuilt on every press (their counts and
@@ -1310,6 +1356,11 @@ let pinchDist = 0, pinchScale = 1;
 
 function wireEvents() {
   els.select.onchange = () => {
+    /* On a board's own page, another board is its own page (boardHref). */
+    if (pageBoard() && els.select.value !== pageBoard()) {
+      location.assign(boardHref(els.select.value));
+      return;
+    }
     noteAsked(null, null);  // a board picked here is the one asked for now
     els.notices.textContent = "";  // and the "showing X instead" is past
     loadBoard(els.select.value);
