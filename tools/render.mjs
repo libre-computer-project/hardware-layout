@@ -44,7 +44,11 @@ const listed = index.filter((b) => !b.hidden);
 
 // The home page: the list of boards, linked to their pages
 const homeFile = "index.html";
-let home = fill(await read(homeFile), parts.boardListHtml(index), `${ORIGIN}/`);
+let home = await read(homeFile);
+// what the tool shows (the page's description) above the list of boards
+const homeDesc = (home.match(/<meta name="description" content="([^"]*)"/) || [, ""])[1]
+  .replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+home = fill(home, parts.boardListHtml(index, homeDesc), `${ORIGIN}/`);
 if (!home.includes('id="parts-text"')) throw new Error("index.html has no <div id=\"parts-text\">");
 await writeFile(path.join(ROOT, homeFile), home);
 

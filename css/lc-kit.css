@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:9087dc5fb8bae4c53a72cf5b1623ea6f626afa9aaebb3e1849043510080a3248 */
+/* lc-kit 1 sha256:87ff922c6e95d3d0f49850e9a0296f3799f50765f6e0bcb23ae6ee914a38552b */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -655,6 +655,13 @@ html.lc-embed .lc-topbar { position: static; padding: 6px 12px; }
 .lc-footer a { color: var(--text-dim); }
 .lc-footer a:hover { color: var(--accent); }
 .lc-footer-links a { white-space: nowrap; }
+
+/* A tool's front page: what the tool shows and every board's own page, in
+   the HTML for a reader that runs no script (each site's tools/render.mjs). */
+.lc-tool-index { padding: 16px; font-size: 14px; color: var(--text-dim); }
+.lc-tool-index h2 { margin: 0 0 6px; font-size: 16px; color: var(--text); }
+.lc-tool-index p { margin: 0 0 8px; }
+.lc-tool-index ul { margin: 0; padding-left: 18px; columns: 16rem; }
 
 /* A page's own note above the footer: where its data comes from, and the
    education module that explains it. */

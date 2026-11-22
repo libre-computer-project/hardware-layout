@@ -83,12 +83,14 @@ export function partsHtml(board) {
 
 /** The home page's list: every board the site lists by default, linked to
  *  its own page. `rows` are data/boards.json rows. */
-export function boardListHtml(rows) {
+export function boardListHtml(rows, lede = "") {
   const items = rows.filter((b) => !b.hidden).map((b) => {
     const size = Array.isArray(b.size_mm) ? `, ${b.size_mm[0]} × ${b.size_mm[1]} mm` : "";
-    return `<li><a href="${esc(b.id)}/">${esc(boardName(b))}</a> ${esc(b.soc)}${esc(size)}</li>`;
+    return `<li><a href="/${esc(b.id)}/">${esc(boardName(b))}</a> ${esc(b.soc)}${esc(size)}</li>`;
   }).join("");
-  return `<details class="parts-text"><summary>Boards</summary><ul>${items}</ul></details>`;
+  // `lede`: what the tool shows (the home page's description), for a reader
+  // that arrives without the drawing
+  return `<details class="parts-text"><summary>Boards</summary>${lede ? `<p>${esc(lede)}</p>` : ""}<ul>${items}</ul></details>`;
 }
 
 /** A board page's <title> and description. */
