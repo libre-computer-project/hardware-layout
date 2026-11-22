@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:6ad18dc698c37231b3ab0d5cac6e6666aaf582dfa15d57eb9212a84d29a4b0ee */
+/* lc-kit 1 sha256:e1693e2c7527f73f8fe4ab007d8dd7657a37f2a527ca819ffa0167163d488613 */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -248,9 +248,9 @@ export function noteAsked(wanted, shownId) {
 }
 
 /**
- * Carry the current query across to the other hardware tools (the switcher
- * links marked data-lc-site; sync.py marks only those between the GPIO,
- * layout and power tools).
+ * Carry the board across to the other tools of its family (the second row's
+ * links marked data-lc-site; sync.py marks those among the GPIO, layout and
+ * power tools, and among the U-Boot, Linux, Android and Zephyr sites).
  *
  * The three tools name the same boards by the same id and all take `?board=`
  * and `?hidden=`, so a visitor looking at a board here should arrive at THAT
@@ -288,7 +288,8 @@ export function mountSiteSwitch(root = document) {
   const carried = () => {
     const here = new URLSearchParams(location.search);
     const q = new URLSearchParams();
-    const board = here.get("asked") || here.get("board");
+    // ...else the board a tool's per-board page is for (/<id>/: body data-board)
+    const board = here.get("asked") || here.get("board") || document.body?.dataset.board;
     if (board) q.set("board", board);
     if (here.get("hidden")) q.set("hidden", here.get("hidden"));
     const s = q.toString();

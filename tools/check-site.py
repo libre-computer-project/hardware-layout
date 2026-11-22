@@ -45,7 +45,10 @@ LEAK = re.compile(
 
 # Hosts the pages are allowed to link out to. A URL in the DATA is a finding
 # whatever it points at; a URL in the markup is fine if it is one of ours.
-LINK_OK = ("libre.computer", "hardware.libre.computer", "github.com/libre-computer-project")
+LINK_OK = ("libre.computer", "hardware.libre.computer", "github.com/libre-computer-project",
+           # the shared footer (tools/lc-ui-kit sync.py SOCIAL, and the company)
+           "facebook.com/librecomputer", "x.com/LibreComputer", "t.me/libre_computer",
+           "instagram.com/librecomputer/", "youtube.com/c/LibreComputer", "imprecisionsystems.com")
 
 ORIGIN = "https://layout.hardware.libre.computer"
 ROBOTS = f"User-agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=yes\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n"

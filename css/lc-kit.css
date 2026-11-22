@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:49a98d562651cce432e0f0e8bd59669b63564b67a7129dab7db1aff492e4dc31 */
+/* lc-kit 1 sha256:46110dafa0fb4021689df2730b5b83c67ed2cb1804fa09593aa160363adb2fca */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -638,6 +638,8 @@ html.lc-embed .lc-topbar { position: static; padding: 6px 12px; }
 
 /* ---- footer ------------------------------------------------------------ */
 
+/* The same footer on every site (sync.py FOOTER): the sections, the social
+   accounts, the company. */
 .lc-footer {
   flex: none;
   padding: 7px 16px;
@@ -646,6 +648,21 @@ html.lc-embed .lc-topbar { position: static; padding: 6px 12px; }
   font-size: 12px;
   color: var(--text-dim);
 }
+.lc-footer p { margin: 2px 0 0; }
+.lc-footer a { color: var(--text-dim); }
+.lc-footer a:hover { color: var(--accent); }
+.lc-footer-links a { white-space: nowrap; }
+
+/* A page's own note above the footer: where its data comes from, and the
+   education module that explains it. */
+.lc-page-note {
+  flex: none;
+  margin: 0;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+html.lc-embed .lc-page-note { display: none; }
 
 /* ---- shared bits both tools grew separately ---------------------------- */
 
