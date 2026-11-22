@@ -22,17 +22,6 @@ const dataUrl = (file) => new URL(`data/${file}`, SITE).href;
    home page. */
 const pageBoard = () => document.body?.dataset.board || null;
 
-/* lc-kit.js fetches "data/lc-products.json" relative to the PAGE, which on a
-   board's own page is <id>/data/... and a 404, so the board's product links
-   would vanish there. The kit is vendored and may not be edited here (the fix
-   belongs upstream, in the kit); until it resolves its own path, a board page
-   points that one address at the site's data/. */
-if (pageBoard()) {
-  const fetchPage = globalThis.fetch.bind(globalThis);
-  globalThis.fetch = (url, opts) =>
-    fetchPage(url === "data/lc-products.json" ? dataUrl("lc-products.json") : url, opts);
-}
-
 /* Category display names, and the order the sidebar lists them in. The order
    is by how much of the board the class explains, not alphabetical: someone
    looking for "the big chips" should not have to scroll past the resistors. */

@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:65b30833ac610053f0785d41296a7f4aa090aac6d7931377e8ad7190688bcd79 */
+/* lc-kit 1 sha256:6ad18dc698c37231b3ab0d5cac6e6666aaf582dfa15d57eb9212a84d29a4b0ee */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -348,7 +348,8 @@ let products = null; // the file's boards, once fetched (a promise)
 
 export async function setBoardLinks(id) {
   if (!products) {
-    products = fetch("data/lc-products.json")
+    // from the site root: a tool's per-board page (/<id>/) is a directory down
+    products = fetch("/data/lc-products.json")
       .then((r) => (r.ok ? r.json() : {}))
       .then((d) => (d && typeof d.boards === "object" && d.boards) || {})
       .catch(() => ({}));
