@@ -48,7 +48,7 @@ LEAK = re.compile(
 LINK_OK = ("libre.computer", "hardware.libre.computer", "github.com/libre-computer-project")
 
 ORIGIN = "https://layout.hardware.libre.computer"
-ROBOTS = f"User-agent: *\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n"
+ROBOTS = f"User-agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=yes\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n"
 
 BASE_KEYS = {"id", "model", "name", "soc", "outline", "categories", "components",
              "nets", "pin_nets", "copper_index"}
