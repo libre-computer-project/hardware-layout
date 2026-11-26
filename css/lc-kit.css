@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:87ff922c6e95d3d0f49850e9a0296f3799f50765f6e0bcb23ae6ee914a38552b */
+/* lc-kit 1 sha256:a7a3ab5e59e4961fccd9a7aa596e9d2a4f72d52913530e20eeb98b5a4cabcb36 */
 /* Libre Computer hardware-tool shell — shared by the GPIO pinout, the board
    layout viewer and the power tree.
  *
@@ -377,8 +377,32 @@ a.lc-site:focus-visible {
   text-transform: uppercase;
   color: var(--accent);
 }
+/* The trail in front of the row (sync.py crumbs_html): where this page sits,
+   Products › board › view or Libre Computer › family › tool. The row
+   wraps, so the trail takes a line of its own above the links. */
+.lc-subnav-sites { flex-wrap: wrap; }
+.lc-crumbs {
+  flex: 1 0 100%;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.lc-crumbs span[aria-hidden] { margin: 0 4px; }
+.lc-crumbs [aria-current] { color: var(--text); }
+/* On a board's page the row is the board's menu: Overview, Downloads, then
+   its Hardware and Software views, each group behind a small label. */
+.lc-board-group { display: inline-flex; align-items: baseline; gap: 4px 12px; }
+.lc-board-group-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.lc-subnav a[aria-current="page"] { color: var(--text); font-weight: 600; }
 /* A phone: one sideways-scrolling row, not a wrap of single links. */
 @media (max-width: 819.98px) {
+  .lc-subnav-sites { flex-wrap: nowrap; }
+  .lc-crumbs { flex: none; padding: 10px 0; }
+  .lc-board-group { flex: none; }
   .lc-subnav {
     flex-wrap: nowrap;
     padding-top: 0;
@@ -655,6 +679,16 @@ html.lc-embed .lc-topbar { position: static; padding: 6px 12px; }
 .lc-footer a { color: var(--text-dim); }
 .lc-footer a:hover { color: var(--accent); }
 .lc-footer-links a { white-space: nowrap; }
+/* Its four groups (Boards, Developers, Learn, Company), side by side. */
+.lc-footer-links { display: flex; flex-wrap: wrap; gap: 4px 28px; margin-bottom: 4px; }
+.lc-footer-group { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.lc-footer-head {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
 
 /* A tool's front page: what the tool shows and every board's own page, in
    the HTML for a reader that runs no script (each site's tools/render.mjs). */

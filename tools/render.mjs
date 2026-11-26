@@ -20,13 +20,18 @@ import { readFile, writeFile, mkdir, readdir, rm, rmdir } from "node:fs/promises
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
-/** The kit's second row as tools/lc-ui-kit/sync.py last wrote it into this
- *  board page (the other tools' pages for this board): kept, so a render
- *  alone changes nothing; sync.py rewrites it when the kit moves. */
-const KIT_ROW = /[ \t]*<div class="lc-subnav-sites">[\s\S]*?<\/div>/;
+/** The kit's rows as tools/lc-ui-kit/sync.py last wrote them into this
+ *  board page -- the top bar (Products current on a board's page) and the
+ *  second row (the board's menu and breadcrumbs): kept, so a render alone
+ *  changes nothing; sync.py rewrites them when the kit moves. */
+const KIT_ROWS = [/[ \t]*<nav class="lc-sites"[\s\S]*?<\/nav>/, /[ \t]*<div class="lc-subnav-sites">[\s\S]*?<\/div>/];
 async function keepKitRow(file, html) {
-  const old = (await readFile(file, "utf8").catch(() => "")).match(KIT_ROW);
-  return old && KIT_ROW.test(html) ? html.replace(KIT_ROW, () => old[0]) : html;
+  const old = await readFile(file, "utf8").catch(() => "");
+  for (const row of KIT_ROWS) {
+    const kept = old.match(row);
+    if (kept && row.test(html)) html = html.replace(row, () => kept[0]);
+  }
+  return html;
 }
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");

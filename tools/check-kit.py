@@ -158,8 +158,14 @@ def check_xml(text):
             if XML_VALUE_BAD.search(value):
                 return f"attribute {name}={value!r} names a URL or a scheme"
     return None
-# every inline script a browser could run: any attributes, any case, no src=
-INLINE_SCRIPT = re.compile(r"<script\b(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script\s*>", re.I | re.S)
+# every inline script a browser could run: any attributes, any case, no src=.
+# The one shape left out is a JSON-LD data block written exactly
+# <script type="application/ld+json"> (the breadcrumbs, sync.py crumbs_html):
+# a browser never runs a data block, so a policy has nothing to allow there.
+# Any other spelling (other attributes, another case, another type) is still
+# counted as a script.
+INLINE_SCRIPT = re.compile(
+    r'<script\b(?!\s*type="application/ld\+json">)(?![^>]*\ssrc\s*=)[^>]*>(.*?)</script\s*>', re.I | re.S)
 SCRIPT_DIRECTIVES = ("script-src", "script-src-elem", "script-src-attr")
 SHA = re.compile(r"'sha256-([A-Za-z0-9+/=]+)'")
 ASCII_WS = re.compile(r"[\t\n\f\r ]+")   # CSP splits on ASCII whitespace only

@@ -1,4 +1,4 @@
-/* lc-kit 1 sha256:e1693e2c7527f73f8fe4ab007d8dd7657a37f2a527ca819ffa0167163d488613 */
+/* lc-kit 1 sha256:abdd2aa506af7fce9d6f21ded1de41930cd7d7bbe6ffb5efe0ef587678ab3f51 */
 /* Libre Computer hardware-tool shell — theme and chrome, shared by the GPIO
  * pinout, the board layout viewer, the power tree and the sites that took the
  * same look.
@@ -387,7 +387,9 @@ export async function setBoardLinks(id) {
     nav.appendChild(a);
   };
   const name = b && typeof b.name === "string" ? b.name : "this board";
-  if (b && safe(b.page)) link(b.page, "Product page", `${name} on libre.computer`);
+  // (a board's own page carries its menu, whose Overview is the product page)
+  const menu = document.querySelector(".lc-subnav .lc-board-group");
+  if (b && safe(b.page) && !menu) link(b.page, "Product page", `${name} on libre.computer`);
   if (b && safe(b.model)) link(b.model, "3D model", `${name}'s 3D model in cad.place`);
   nav.hidden = !nav.childElementCount;
   return nav;
