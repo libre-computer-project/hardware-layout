@@ -104,7 +104,12 @@ await writeFile(path.join(ROOT, "llms.txt"), [
   `> ${meta(home, /<meta name="description" content="([^"]*)"/)}`, "",
   "Part of Libre Computer (https://libre.computer/llms.txt). Each board's page carries its connectors and main parts as HTML.", "",
   "## Boards", "",
-  ...listed.map((b) => `- [${parts.boardName(b)}](${pageUrl(b.id)})`), "",
+  // each line: what the page's own summary line says (parts.boardFacts), and its connector count
+  ...await Promise.all(listed.map(async (b) => {
+    const board = await json(`data/${b.id}.json`);
+    const conns = ["top", "bot"].flatMap((s) => board.components?.[s] || []).filter((c) => c.c === "connector").length;
+    return `- [${parts.boardName(b)}](${pageUrl(b.id)}): ${parts.boardFacts(board)}, ${conns} connectors`;
+  })), "",
 ].join("\n"));
 
 console.log(`rendered index.html, ${listed.length} board pages (${index.length - listed.length} hidden boards skipped), robots.txt, sitemap.xml, llms.txt`);

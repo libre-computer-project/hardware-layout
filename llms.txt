@@ -6,11 +6,11 @@ Part of Libre Computer (https://libre.computer/llms.txt). Each board's page carr
 
 ## Boards
 
-- [Le Potato (AML-S905X-CC)](https://layout.hardware.libre.computer/aml-s905x-cc/)
-- [Sweet Potato (AML-S905X-CC-V2)](https://layout.hardware.libre.computer/aml-s905x-cc-v2/)
-- [La Frite (AML-S805X-AC)](https://layout.hardware.libre.computer/aml-s805x-ac/)
-- [Das Frite (AML-S805X-AC-V2)](https://layout.hardware.libre.computer/aml-s805x-ac-v2/)
-- [Alta (AML-A311D-CC)](https://layout.hardware.libre.computer/aml-a311d-cc/)
-- [Solitude (AML-S905D3-CC)](https://layout.hardware.libre.computer/aml-s905d3-cc/)
-- [Renegade (ROC-RK3328-CC)](https://layout.hardware.libre.computer/roc-rk3328-cc/)
-- [Tritium (ALL-H3-CC)](https://layout.hardware.libre.computer/all-h3-cc/)
+- [Le Potato (AML-S905X-CC)](https://layout.hardware.libre.computer/aml-s905x-cc/): revision V1.0-A, S905X SoC, 84 × 56 mm, no copper layers in this export, 377 placed parts, 12 connectors
+- [Sweet Potato (AML-S905X-CC-V2)](https://layout.hardware.libre.computer/aml-s905x-cc-v2/): revision V2.0-C, S905X SoC, 85 × 56 mm, 6 copper layers, 397 placed parts, 304 nets, 14 connectors
+- [La Frite (AML-S805X-AC)](https://layout.hardware.libre.computer/aml-s805x-ac/): revision V1.0C, S805X SoC, 56 × 65 mm, no copper layers in this export, 340 placed parts, 10 connectors
+- [Das Frite (AML-S805X-AC-V2)](https://layout.hardware.libre.computer/aml-s805x-ac-v2/): revision V2.0C, S805X SoC, 56 × 65 mm, 6 copper layers, 342 placed parts, 239 nets, 10 connectors
+- [Alta (AML-A311D-CC)](https://layout.hardware.libre.computer/aml-a311d-cc/): revision V1.0C, A311D SoC, 85 × 56 mm, 8 copper layers, 679 placed parts, 508 nets, 13 connectors
+- [Solitude (AML-S905D3-CC)](https://layout.hardware.libre.computer/aml-s905d3-cc/): revision V1.0C, S905D3 SoC, 85 × 56 mm, 8 copper layers, 679 placed parts, 508 nets, 13 connectors
+- [Renegade (ROC-RK3328-CC)](https://layout.hardware.libre.computer/roc-rk3328-cc/): revision V1.3-B, RK3328 SoC, 85 × 56 mm, no copper layers in this export, 485 placed parts, 10 connectors
+- [Tritium (ALL-H3-CC)](https://layout.hardware.libre.computer/all-h3-cc/): revision V1.1, H2+/H3/H5 SoC, 84 × 56 mm, no copper layers in this export, 309 placed parts, 10 connectors
