@@ -1,0 +1,38 @@
+{
+ "https://layout.hardware.libre.computer/": {
+  "hash": "fc76f9a1600b5ae0",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/aml-s905x-cc/": {
+  "hash": "6ab7da84f5c17ac0",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/aml-s905x-cc-v2/": {
+  "hash": "bcd547bea9d1d3e4",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/aml-s805x-ac/": {
+  "hash": "e60a6ff697faa3a7",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/aml-s805x-ac-v2/": {
+  "hash": "532566ca66536262",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/aml-a311d-cc/": {
+  "hash": "f0f2729e2b032ed0",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/aml-s905d3-cc/": {
+  "hash": "c814167292442f1d",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/roc-rk3328-cc/": {
+  "hash": "a9544e58522f6656",
+  "date": "2026-11-26"
+ },
+ "https://layout.hardware.libre.computer/all-h3-cc/": {
+  "hash": "35c1baf1ff9e08ef",
+  "date": "2026-11-26"
+ }
+}
